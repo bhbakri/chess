@@ -47,19 +47,65 @@ public class ChessPiece {
     /**
      * Calculates all the positions a chess piece can move to.
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        List<ChessMove> moves = new ArrayList<>();
+public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+    List<ChessMove> moves = new ArrayList<>();
 
-        if (type == PieceType.ROOK) {
+    switch (type) {
+        case ROOK:
             // 4 directions: up, down, left, right
-            addSlidingMoves(board, position, moves, 1, 0);   // up
-            addSlidingMoves(board, position, moves, -1, 0);  // down
-            addSlidingMoves(board, position, moves, 0, 1);   // right
-            addSlidingMoves(board, position, moves, 0, -1);  // left
-        }
+            addSlidingMoves(board, position, moves, 1, 0);
+            addSlidingMoves(board, position, moves, -1, 0);
+            addSlidingMoves(board, position, moves, 0, 1);
+            addSlidingMoves(board, position, moves, 0, -1);
+            break;
 
-        return moves;
+        case BISHOP:
+            // 4 diagonals
+            addSlidingMoves(board, position, moves, 1, 1);
+            addSlidingMoves(board, position, moves, 1, -1);
+            addSlidingMoves(board, position, moves, -1, 1);
+            addSlidingMoves(board, position, moves, -1, -1);
+            break;
+
+        case QUEEN:
+            // Rook + Bishop directions
+            int[][] queenDirs = {
+                    {1, 0}, {-1, 0}, {0, 1}, {0, -1}, // rook
+                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // bishop
+            };
+            for (int[] d : queenDirs) {
+                addSlidingMoves(board, position, moves, d[0], d[1]);
+            }
+            break;
+
+        case KING:
+            // One square in any direction
+            int[][] kingDirs = {
+                    {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+            };
+            for (int[] d : kingDirs) {
+                int newRow = position.getRow() + d[0];
+                int newCol = position.getColumn() + d[1];
+
+                if (newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8) {
+                    ChessPosition newPos = new ChessPosition(newRow, newCol);
+                    ChessPiece pieceAt = board.getPiece(newPos);
+
+                    if (pieceAt == null || pieceAt.getTeamColor() != this.getTeamColor()) {
+                        moves.add(new ChessMove(position, newPos, null));
+                    }
+                }
+            }
+            break;
+
+        default:
+            // Knight & Pawn not yet implemented
+            break;
     }
+
+    return moves;
+}
 
     /**
      * Helper method for sliding pieces (rook, bishop, queen).
