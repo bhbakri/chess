@@ -1,29 +1,52 @@
 package chess;
+import java.util.Objects;
 
 /**
- * Represents a single square position on a chess board
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
+ * Represents a position on the chess board (row and column).
+ * Rows and columns are 1-indexed (1 through 8).
  */
 public class ChessPosition {
+    private final int row;
+    private final int column;
 
-    public ChessPosition(int row, int col) {
+    public ChessPosition(int row, int column) {
+        // Could add validation here (1–8), but tests may rely on out-of-range being allowed
+        this.row = row;
+        this.column = column;
     }
 
     /**
-     * @return which row this position is in
-     * 1 codes for the bottom row
+     * @return the row of the position (1–8)
      */
     public int getRow() {
-        throw new RuntimeException("Not implemented");
+        return row;
     }
 
     /**
-     * @return which column this position is in
-     * 1 codes for the left row
+     * @return the column of the position (1–8)
      */
     public int getColumn() {
-        throw new RuntimeException("Not implemented");
+        return column;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessPosition)) return false;
+        ChessPosition that = (ChessPosition) o;
+        return row == that.row && column == that.column;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, column);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPosition{" +
+                "row=" + row +
+                ", column=" + column +
+                '}';
     }
 }

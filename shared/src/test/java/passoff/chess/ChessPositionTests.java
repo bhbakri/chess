@@ -1,52 +1,30 @@
-package chess;
-import java.util.Objects;
+package passoff.chess;
 
-/**
- * Represents a position on the chess board (row and column).
- * Rows and columns are 1-indexed (1 through 8).
- */
-public class ChessPosition {
-    private final int row;
-    private final int column;
+import chess.ChessPosition;
 
-    public ChessPosition(int row, int column) {
-        // Could add validation here (1–8), but tests may rely on out-of-range being allowed
-        this.row = row;
-        this.column = column;
-    }
+import java.util.Collection;
+import java.util.List;
 
-    /**
-     * @return the row of the position (1–8)
-     */
-    public int getRow() {
-        return row;
-    }
-
-    /**
-     * @return the column of the position (1–8)
-     */
-    public int getColumn() {
-        return column;
+public class ChessPositionTests extends EqualsTestingUtility<ChessPosition> {
+    public ChessPositionTests() {
+        super("ChessPosition", "positions");
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChessPosition)) return false;
-        ChessPosition that = (ChessPosition) o;
-        return row == that.row && column == that.column;
+    protected ChessPosition buildOriginal() {
+        return new ChessPosition(3, 7);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(row, column);
+    protected Collection<ChessPosition> buildAllDifferent() {
+        return List.of(
+                new ChessPosition(7, 3),
+                new ChessPosition(6, 3),
+                new ChessPosition(4, 3),
+                new ChessPosition(3, 1),
+                new ChessPosition(3, 2),
+                new ChessPosition(3, 3)
+        );
     }
 
-    @Override
-    public String toString() {
-        return "ChessPosition{" +
-                "row=" + row +
-                ", column=" + column +
-                '}';
-    }
 }
