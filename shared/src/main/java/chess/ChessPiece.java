@@ -47,70 +47,122 @@ public class ChessPiece {
     /**
      * Calculates all the positions a chess piece can move to.
      */
-public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-    List<ChessMove> moves = new ArrayList<>();
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+        List<ChessMove> moves = new ArrayList<>();
 
-    switch (type) {
-        case ROOK:
-            // 4 directions: up, down, left, right
-            addSlidingMoves(board, position, moves, 1, 0);
-            addSlidingMoves(board, position, moves, -1, 0);
-            addSlidingMoves(board, position, moves, 0, 1);
-            addSlidingMoves(board, position, moves, 0, -1);
-            break;
+        switch (type) {
+            case ROOK:
+                addSlidingMoves(board, position, moves, 1, 0);
+                addSlidingMoves(board, position, moves, -1, 0);
+                addSlidingMoves(board, position, moves, 0, 1);
+                addSlidingMoves(board, position, moves, 0, -1);
+                break;
 
-        case BISHOP:
-            // 4 diagonals
-            addSlidingMoves(board, position, moves, 1, 1);
-            addSlidingMoves(board, position, moves, 1, -1);
-            addSlidingMoves(board, position, moves, -1, 1);
-            addSlidingMoves(board, position, moves, -1, -1);
-            break;
+            case BISHOP:
+                addSlidingMoves(board, position, moves, 1, 1);
+                addSlidingMoves(board, position, moves, 1, -1);
+                addSlidingMoves(board, position, moves, -1, 1);
+                addSlidingMoves(board, position, moves, -1, -1);
+                break;
 
-        case QUEEN:
-            // Rook + Bishop directions
-            int[][] queenDirs = {
-                    {1, 0}, {-1, 0}, {0, 1}, {0, -1}, // rook
-                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // bishop
-            };
-            for (int[] d : queenDirs) {
-                addSlidingMoves(board, position, moves, d[0], d[1]);
-            }
-            break;
+            case QUEEN:
+                int[][] queenDirs = {
+                        {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                        {1, 1}, {1, -1}, 
+                };
+                for (int[] d : queenDirs) {
+                    addSlidingMoves(board, position, moves, d[0], d[1]);
+                }
+                break;
 
-        case KING:
-            // One square in any direction
-            int[][] kingDirs = {
-                    {1, 0}, {-1, 0}, {0, 1}, {0, -1},
-                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
-            };
-            for (int[] d : kingDirs) {
-                int newRow = position.getRow() + d[0];
-                int newCol = position.getColumn() + d[1];
-
-                if (newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8) {
-                    ChessPosition newPos = new ChessPosition(newRow, newCol);
-                    ChessPiece pieceAt = board.getPiece(newPos);
-
-                    if (pieceAt == null || pieceAt.getTeamColor() != this.getTeamColor()) {
-                        moves.add(new ChessMove(position, newPos, null));
+            case KING:
+                int[][] kingDirs = {
+                        {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+                };
+                for (int[] d : kingDirs) {
+                    int newRow = position.getRow() + d[0];
+                    int newCol = position.getColumn() + d[1];
+                    if (isInBounds(newRow, newCol)) {
+                        addIfValid(board, position, moves, newRow, newCol);
                     }
                 }
-            }
-            break;
+                break;
 
-        default:
-            // Knight & Pawn not yet implemented
-            break;
+            case KNIGHT:
+                int[][] knightMoves = {
+                        {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                        {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+                };
+                for (int[] d : knightMoves) {
+                    int newRow = position.getRow() + d[0];
+                    int newCol = position.getColumn() + d[1];
+                    if (isInBounds(newRow, newCol)) {
+                        addIfValid(board, position, moves, newRow, newCol);
+                    }
+                }
+                break;
+
+            case PAWN:
+                addPawnMoves(board, position, moves);
+                break;
+        }
+
+        return moves;
     }
 
-    return moves;
-}
+    /** Pawn movement rules */
+    private void addPawnMoves(ChessBoard board, ChessPosition position, List<ChessMove> moves) {
+        int dir = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
 
-    /**
-     * Helper method for sliding pieces (rook, bishop, queen).
-     * Moves in a direction until blocked.
-     */
+        int row = position.getRow();
+        int col = position.getColumn();
+
+        // Forward move
+        int forwardRow = row + dir;
+        if (isInBounds(forwardRow, col) && board.getPiece(new ChessPosition(forwardRow, col)) == null) {
+            addPawnMoveWithPromotion(position, moves, forwardRow, col, promotionRow);
+
+            // Double move from start
+            if (row == startRow) {
+                int twoForward = row + 2 * dir;
+                if (board.getPiece(new ChessPosition(twoForward, col)) == null) {
+                    moves.add(new ChessMove(position, new ChessPosition(twoForward, col), null));
+                }
+            }
+        }
+
+        // Captures (diagonal left & right)
+        int[][] captureDirs = {{dir, -1}, {dir, 1}};
+        for (int[] d : captureDirs) {
+            int newRow = row + d[0];
+            int newCol = col + d[1];
+            if (isInBounds(newRow, newCol)) {
+                ChessPosition newPos = new ChessPosition(newRow, newCol);
+                ChessPiece target = board.getPiece(newPos);
+                if (target != null && target.getTeamColor() != this.getTeamColor()) {
+                    addPawnMoveWithPromotion(position, moves, newRow, newCol, promotionRow);
+                }
+            }
+        }
+    }
+
+    /** Adds pawn promotion options if reaching last rank */
+    private void addPawnMoveWithPromotion(ChessPosition from, List<ChessMove> moves, int row, int col, int promotionRow) {
+        ChessPosition newPos = new ChessPosition(row, col);
+        if (row == promotionRow) {
+            moves.add(new ChessMove(from, newPos, PieceType.QUEEN));
+            moves.add(new ChessMove(from, newPos, PieceType.ROOK));
+            moves.add(new ChessMove(from, newPos, PieceType.BISHOP));
+            moves.add(new ChessMove(from, newPos, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(from, newPos, null));
+        }
+    }
+
+    /** Helper for sliding pieces (rook, bishop, queen) */
     private void addSlidingMoves(ChessBoard board, ChessPosition position,
                                  List<ChessMove> moves, int rowDir, int colDir) {
         int row = position.getRow();
@@ -120,9 +172,7 @@ public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position
             row += rowDir;
             col += colDir;
 
-            if (row < 1 || row > 8 || col < 1 || col > 8) {
-                break; // out of bounds
-            }
+            if (!isInBounds(row, col)) break;
 
             ChessPosition newPos = new ChessPosition(row, col);
             ChessPiece pieceAt = board.getPiece(newPos);
@@ -136,6 +186,19 @@ public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position
                 break; // stop when blocked
             }
         }
+    }
+
+    /** Helper for one-square moves (king, knight) */
+    private void addIfValid(ChessBoard board, ChessPosition from, List<ChessMove> moves, int row, int col) {
+        ChessPosition newPos = new ChessPosition(row, col);
+        ChessPiece pieceAt = board.getPiece(newPos);
+        if (pieceAt == null || pieceAt.getTeamColor() != this.getTeamColor()) {
+            moves.add(new ChessMove(from, newPos, null));
+        }
+    }
+
+    private boolean isInBounds(int row, int col) {
+        return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }
 
     @Override
