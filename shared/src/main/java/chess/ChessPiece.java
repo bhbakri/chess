@@ -68,7 +68,7 @@ public class ChessPiece {
             case QUEEN:
                 int[][] queenDirs = {
                         {1, 0}, {-1, 0}, {0, 1}, {0, -1},
-                        {1, 1}, {1, -1}, 
+                        {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
                 };
                 for (int[] d : queenDirs) {
                     addSlidingMoves(board, position, moves, d[0], d[1]);
