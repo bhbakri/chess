@@ -111,7 +111,6 @@ public class ChessPiece {
         return moves;
     }
 
-    /** Pawn movement rules */
     private void addPawnMoves(ChessBoard board, ChessPosition position, List<ChessMove> moves) {
         int dir = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
         int startRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
@@ -149,7 +148,6 @@ public class ChessPiece {
         }
     }
 
-    /** Adds pawn promotion options if reaching last rank */
     private void addPawnMoveWithPromotion(ChessPosition from, List<ChessMove> moves, int row, int col, int promotionRow) {
         ChessPosition newPos = new ChessPosition(row, col);
         if (row == promotionRow) {
@@ -162,7 +160,6 @@ public class ChessPiece {
         }
     }
 
-    /** Helper for sliding pieces (rook, bishop, queen) */
     private void addSlidingMoves(ChessBoard board, ChessPosition position,
                                  List<ChessMove> moves, int rowDir, int colDir) {
         int row = position.getRow();
@@ -188,7 +185,6 @@ public class ChessPiece {
         }
     }
 
-    /** Helper for one-square moves (king, knight) */
     private void addIfValid(ChessBoard board, ChessPosition from, List<ChessMove> moves, int row, int col) {
         ChessPosition newPos = new ChessPosition(row, col);
         ChessPiece pieceAt = board.getPiece(newPos);
