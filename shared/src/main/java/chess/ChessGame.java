@@ -37,7 +37,23 @@ public class ChessGame {
         if (piece == null) return null;
 
         Collection<ChessMove> raw = piece.pieceMoves(board, startPosition);
-        return (raw == null) ? Collections.emptyList() : raw;
+        if (raw == null || raw.isEmpty()) return Collections.emptyList();
+
+        TeamColor mover = piece.getTeamColor();
+        List<ChessMove> legal = new ArrayList<>();
+
+        for (ChessMove mv : raw) {
+            if (mv == null) continue;
+
+            ChessBoard sandbox = copyBoard(board);
+            applyMove(sandbox, mv);
+
+            if (!isInCheckOnBoard(sandbox, mover)) {
+                legal.add(mv);
+            }
+        }
+
+        return legal;
     }
 
     // Ensures its their turn and that the move is legal
@@ -52,8 +68,8 @@ public class ChessGame {
             throw new InvalidMoveException("It's not " + moverPiece.getTeamColor() + "'s turn");
         }
 
-        Collection<ChessMove> rawFromHere = moverPiece.pieceMoves(board, start);
-        if (rawFromHere == null || !rawFromHere.contains(move)) {
+        Collection<ChessMove> legalFromHere = validMoves(start);
+        if (legalFromHere == null || !legalFromHere.contains(move)) {
             throw new InvalidMoveException("Illegal move");
         }
 
@@ -73,12 +89,16 @@ public class ChessGame {
     }
 
     public boolean isInCheckmate(TeamColor teamColor) {
-        return false;
+        if (teamColor == null) return false;
+        if (!isInCheck(teamColor)) return false;
+        return !hasAnyLegalMove(teamColor);
     }
 
     // Stalemate
     public boolean isInStalemate(TeamColor teamColor) {
-        return false;
+        if (teamColor == null) return false;
+        if (isInCheck(teamColor)) return false;
+        return !hasAnyLegalMove(teamColor);
     }
 
     public void setBoard(ChessBoard board) {
@@ -87,6 +107,23 @@ public class ChessGame {
 
     public ChessBoard getBoard() {
         return board;
+    }
+
+    private boolean hasAnyLegalMove(TeamColor team) {
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                ChessPiece p = board.getPiece(pos);
+                if (p == null) continue;
+                if (p.getTeamColor() != team) continue;
+
+                Collection<ChessMove> vm = validMoves(pos);
+                if (vm != null && !vm.isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isInCheckOnBoard(ChessBoard b, TeamColor team) {
