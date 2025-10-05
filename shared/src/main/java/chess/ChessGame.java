@@ -207,4 +207,27 @@ public class ChessGame {
             b.addPiece(to, moving);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ChessGame)) return false;
+
+        ChessGame other = (ChessGame) obj;
+
+        if (this.turn != other.turn) return false;
+
+        if (this.board == null && other.board == null) return true;
+        if (this.board == null || other.board == null) return false;
+
+        return this.board.equals(other.board);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 17;
+        h = 31 * h + (turn == null ? 0 : turn.hashCode());
+        h = 31 * h + (board == null ? 0 : board.hashCode());
+        return h;
+    }
 }
