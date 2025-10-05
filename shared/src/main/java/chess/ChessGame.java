@@ -40,8 +40,9 @@ public class ChessGame {
         if (raw == null || raw.isEmpty()) return Collections.emptyList();
 
         TeamColor mover = piece.getTeamColor();
-        List<ChessMove> legal = new ArrayList<>();
+        List<ChessMove> legal = new ArrayList<>(raw.size());
 
+        // keeps only moves that don't leave the king in check
         for (ChessMove mv : raw) {
             if (mv == null) continue;
 
@@ -56,7 +57,7 @@ public class ChessGame {
         return legal;
     }
 
-    // Ensures its their turn and that the move is legal
+    // Ensures it's their turn and that the move is legal
     public void makeMove(ChessMove move) throws InvalidMoveException {
         if (move == null) throw new InvalidMoveException("Move is null");
 
@@ -74,67 +75,64 @@ public class ChessGame {
         }
 
         applyMove(board, move);
-
-        if (turn == TeamColor.WHITE) {
-            turn = TeamColor.BLACK;
-        } else {
-            turn = TeamColor.WHITE;
-        }
+        toggleTurn();
     }
 
-    // True If In Check
+    // True if checked
     public boolean isInCheck(TeamColor teamColor) {
         if (teamColor == null) return false;
         return isInCheckOnBoard(board, teamColor);
     }
 
+    // true if checkmate
     public boolean isInCheckmate(TeamColor teamColor) {
         if (teamColor == null) return false;
         if (!isInCheck(teamColor)) return false;
         return !hasAnyLegalMove(teamColor);
     }
 
-    // Stalemate
+    // stalemates the game
     public boolean isInStalemate(TeamColor teamColor) {
         if (teamColor == null) return false;
         if (isInCheck(teamColor)) return false;
         return !hasAnyLegalMove(teamColor);
     }
 
+    // replaces the board
     public void setBoard(ChessBoard board) {
         this.board = (board != null) ? board : new ChessBoard();
     }
 
+    // actual board
     public ChessBoard getBoard() {
         return board;
     }
 
+    //helper functions VVVVV
+
+    // checks if any remaining legal movies are preset
     private boolean hasAnyLegalMove(TeamColor team) {
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r, c);
                 ChessPiece p = board.getPiece(pos);
-                if (p == null) continue;
-                if (p.getTeamColor() != team) continue;
+                if (p == null || p.getTeamColor() != team) continue;
 
                 Collection<ChessMove> vm = validMoves(pos);
-                if (vm != null && !vm.isEmpty()) {
-                    return true;
-                }
+                if (vm != null && !vm.isEmpty()) return true;
             }
         }
         return false;
     }
 
+    // checks if a color is checked
     private boolean isInCheckOnBoard(ChessBoard b, TeamColor team) {
         if (b == null) return false;
 
         ChessPosition king = findKing(b, team);
-        if (king == null) {
-            return false;
-        }
+        if (king == null) return false;
 
-        TeamColor enemy = (team == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        TeamColor enemy = opposite(team);
 
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -146,16 +144,14 @@ public class ChessGame {
                 if (raw == null || raw.isEmpty()) continue;
 
                 for (ChessMove mv : raw) {
-                    if (mv != null && king.equals(mv.getEndPosition())) {
-                        return true;
-                    }
+                    if (mv != null && king.equals(mv.getEndPosition())) return true;
                 }
             }
         }
-
         return false;
     }
 
+    // finds the king for a color
     private ChessPosition findKing(ChessBoard b, TeamColor team) {
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
@@ -163,17 +159,15 @@ public class ChessGame {
                 ChessPiece p = b.getPiece(pos);
                 if (p == null) continue;
                 if (p.getTeamColor() != team) continue;
-                if (p.getPieceType() == ChessPiece.PieceType.KING) {
-                    return pos;
-                }
+                if (p.getPieceType() == ChessPiece.PieceType.KING) return pos;
             }
         }
         return null;
     }
 
+    // copies the board
     private ChessBoard copyBoard(ChessBoard src) {
         ChessBoard dst = new ChessBoard();
-
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r, c);
@@ -188,7 +182,7 @@ public class ChessGame {
         return dst;
     }
 
-    //handles all the different types of moves
+    //hanldes all the chess moves
     private void applyMove(ChessBoard b, ChessMove mv) {
         if (b == null || mv == null) return;
 
@@ -208,26 +202,25 @@ public class ChessGame {
         }
     }
 
+    // swap to the other side
+    private void toggleTurn() {
+        turn = (turn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+    }
+
+    // enemy color returner
+    private TeamColor opposite(TeamColor team) {
+        return (team == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof ChessGame)) return false;
-
-        ChessGame other = (ChessGame) obj;
-
-        if (this.turn != other.turn) return false;
-
-        if (this.board == null && other.board == null) return true;
-        if (this.board == null || other.board == null) return false;
-
-        return this.board.equals(other.board);
+        if (!(obj instanceof ChessGame other)) return false;
+        return Objects.equals(board, other.board) && turn == other.turn;
     }
 
     @Override
     public int hashCode() {
-        int h = 17;
-        h = 31 * h + (turn == null ? 0 : turn.hashCode());
-        h = 31 * h + (board == null ? 0 : board.hashCode());
-        return h;
+        return Objects.hash(board, turn);
     }
 }
