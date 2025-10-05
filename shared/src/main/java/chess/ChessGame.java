@@ -68,7 +68,8 @@ public class ChessGame {
 
     // True If In Check
     public boolean isInCheck(TeamColor teamColor) {
-        return false;
+        if (teamColor == null) return false;
+        return isInCheckOnBoard(board, teamColor);
     }
 
     public boolean isInCheckmate(TeamColor teamColor) {
@@ -88,6 +89,69 @@ public class ChessGame {
         return board;
     }
 
+    private boolean isInCheckOnBoard(ChessBoard b, TeamColor team) {
+        if (b == null) return false;
+
+        ChessPosition king = findKing(b, team);
+        if (king == null) {
+            return false;
+        }
+
+        TeamColor enemy = (team == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition p = new ChessPosition(r, c);
+                ChessPiece piece = b.getPiece(p);
+                if (piece == null || piece.getTeamColor() != enemy) continue;
+
+                Collection<ChessMove> raw = piece.pieceMoves(b, p);
+                if (raw == null || raw.isEmpty()) continue;
+
+                for (ChessMove mv : raw) {
+                    if (mv != null && king.equals(mv.getEndPosition())) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private ChessPosition findKing(ChessBoard b, TeamColor team) {
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                ChessPiece p = b.getPiece(pos);
+                if (p == null) continue;
+                if (p.getTeamColor() != team) continue;
+                if (p.getPieceType() == ChessPiece.PieceType.KING) {
+                    return pos;
+                }
+            }
+        }
+        return null;
+    }
+
+    private ChessBoard copyBoard(ChessBoard src) {
+        ChessBoard dst = new ChessBoard();
+
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                ChessPiece p = src.getPiece(pos);
+                if (p == null) {
+                    dst.addPiece(pos, null);
+                } else {
+                    dst.addPiece(pos, new ChessPiece(p.getTeamColor(), p.getPieceType()));
+                }
+            }
+        }
+        return dst;
+    }
+
+    //handles all the different types of moves
     private void applyMove(ChessBoard b, ChessMove mv) {
         if (b == null || mv == null) return;
 
