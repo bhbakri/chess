@@ -28,33 +28,33 @@ public class GameServiceTest {
 
     // list
     @Test
-    void list_Positive() throws Exception {
+    void listPositive() throws Exception {
         var list = games.list(authAlice);
         assertNotNull(list.games());
         assertTrue(list.games().isEmpty());
     }
 
     @Test
-    void list_Negative_Unauthorized() {
+    void listNegativeUnauthorized() {
         assertThrows(SecurityException.class, () -> games.list("badtoken"));
     }
 
     // create
     @Test
-    void create_Positive() throws Exception {
+    void createPositive() throws Exception {
         var res = games.create(authAlice, new Server.CreateGameRequest("g1"));
         assertTrue(res.gameID() > 0);
     }
 
     @Test
-    void create_Negative_BadRequest() {
+    void createNegativeBadRequest() {
         assertThrows(IllegalArgumentException.class,
                 () -> games.create(authAlice, new Server.CreateGameRequest("")));
     }
 
     // join
     @Test
-    void join_Positive() throws Exception {
+    void joinPositive() throws Exception {
         var g = games.create(authAlice, new Server.CreateGameRequest("g1"));
         assertDoesNotThrow(() -> games.join(authAlice, new Server.JoinGameRequest("WHITE", g.gameID())));
         var list = games.list(authAlice);
@@ -64,7 +64,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void join_Negative_ColorTaken() throws Exception {
+    void joinNegativeColorTaken() throws Exception {
         var g = games.create(authAlice, new Server.CreateGameRequest("g1"));
         games.join(authAlice, new Server.JoinGameRequest("BLACK", g.gameID()));
         assertThrows(SecurityException.class,
@@ -72,20 +72,20 @@ public class GameServiceTest {
     }
 
     @Test
-    void join_Negative_BadColor() throws Exception {
+    void joinNegativeBadColor() throws Exception {
         var g = games.create(authAlice, new Server.CreateGameRequest("g1"));
         assertThrows(IllegalArgumentException.class,
                 () -> games.join(authAlice, new Server.JoinGameRequest("GREEN", g.gameID())));
     }
 
     @Test
-    void join_Negative_BadGameId() {
+    void joinNegativeBadGameId() {
         assertThrows(IllegalArgumentException.class,
                 () -> games.join(authAlice, new Server.JoinGameRequest("WHITE", null)));
     }
 
     @Test
-    void join_Negative_Unauthorized() throws Exception {
+    void joinNegativeUnauthorized() throws Exception {
         var g = games.create(authAlice, new Server.CreateGameRequest("g1"));
         assertThrows(SecurityException.class,
                 () -> games.join("badtoken", new Server.JoinGameRequest("WHITE", g.gameID())));

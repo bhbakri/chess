@@ -21,13 +21,13 @@ public class ClearServiceTest {
     }
 
     @Test
-    void clear_Positive() throws Exception {
+    void clearPositive() throws Exception {
         var reg = users.register(new Server.RegisterRequest("u", "p", "e@e"));
         assertNotNull(reg.authToken());
 
         assertDoesNotThrow(() -> clear.clear());
 
-        // After clear, login should fail (no users)
+        // after clear, login should fail (user removed)
         assertThrows(SecurityException.class,
                 () -> users.login(new Server.LoginRequest("u", "p")));
     }

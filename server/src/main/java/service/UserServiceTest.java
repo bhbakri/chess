@@ -19,21 +19,21 @@ public class UserServiceTest {
     }
 
     @Test
-    void register_Positive() throws Exception {
+    void registerPositive() throws Exception {
         var res = users.register(new Server.RegisterRequest("alice", "pw", "a@a"));
         assertEquals("alice", res.username());
         assertNotNull(res.authToken());
     }
 
     @Test
-    void register_Negative_Duplicate() throws Exception {
+    void registerNegativeDuplicate() throws Exception {
         users.register(new Server.RegisterRequest("alice", "pw", "a@a"));
         assertThrows(SecurityException.class,
                 () -> users.register(new Server.RegisterRequest("alice", "pw", "a@a")));
     }
 
     @Test
-    void login_Positive() throws Exception {
+    void loginPositive() throws Exception {
         users.register(new Server.RegisterRequest("bob", "pw", "b@b"));
         var res = users.login(new Server.LoginRequest("bob", "pw"));
         assertEquals("bob", res.username());
@@ -41,14 +41,14 @@ public class UserServiceTest {
     }
 
     @Test
-    void login_Negative_Unauthorized() throws Exception {
+    void loginNegativeUnauthorized() throws Exception {
         users.register(new Server.RegisterRequest("bob", "pw", "b@b"));
         assertThrows(SecurityException.class,
                 () -> users.login(new Server.LoginRequest("bob", "WRONG")));
     }
 
     @Test
-    void logout_Positive() throws Exception {
+    void logoutPositive() throws Exception {
         var reg = users.register(new Server.RegisterRequest("carol", "pw", "c@c"));
         assertDoesNotThrow(() -> users.logout(new Server.LogoutRequest(reg.authToken())));
         // same token again should be unauthorized
@@ -57,7 +57,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logout_Negative_Unauthorized() {
+    void logoutNegativeUnauthorized() {
         assertThrows(SecurityException.class,
                 () -> users.logout(new Server.LogoutRequest("no-such-token")));
     }
