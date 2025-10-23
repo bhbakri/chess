@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>CS 240 Chess Server</title>
 
-    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-    <link rel="stylesheet" href="index.css"/>
+    <link href="/favicon.ico" rel="icon" type="image/x-icon"/>
+    <link href="index.css" rel="stylesheet"/>
     <script defer src="index.js"></script>
 </head>
 
@@ -101,15 +101,15 @@
 <div class="box">
     <h3>Request</h3>
     <div class="input">
-        <label for="method">Method:</label> <input type="text" id="method"/>
+        <label for="method">Method:</label> <input id="method" type="text"/>
     </div>
 
     <div class="input">
-        <label for="handleBox">Endpoint:</label> <input type="text" id="handleBox" name="handleBox"/>
+        <label for="handleBox">Endpoint:</label> <input id="handleBox" name="handleBox" type="text"/>
     </div>
 
     <div class="input">
-        <label for="authToken">Auth Token:</label> <input type="text" id="authToken" name="authToken"/>
+        <label for="authToken">Auth Token:</label> <input id="authToken" name="authToken" type="text"/>
     </div>
 
     <div class="input">
@@ -118,13 +118,13 @@
 
     <button onclick="submit()">Send</button>
 </div>
-<div id="responseBox" class="box">
+<div class="box" id="responseBox">
     <h3>HTTP Response</h3>
     <pre id="response" readonly></pre>
 </div>
 <h2>Websocket</h2>
 <p>This section is only applicable during phase 6. Use this to test the websocket functionality of your server</p>
-<div id="websocketConnectBox" class="box">
+<div class="box" id="websocketConnectBox">
     <h3>Connect to websocket</h3>
     <button onclick="connectWs()">Connect</button>
 </div>
@@ -182,7 +182,7 @@
             <button onclick="closeWs()">Close</button>
         </div>
     </div>
-    <div id="wsMessageBox" class="box">
+    <div class="box" id="wsMessageBox">
         <h3 id="wsMessageBoxLabel">Websocket Server Messages</h3>
     </div>
 </div>

@@ -96,7 +96,7 @@ public class WebSocketTests {
 
         //make a valid pawn move
         ChessMove move = new ChessMove(new ChessPosition(2, 5), new ChessPosition(3, 5), null);
-        makeMove(white, gameID, move,true, false, Set.of(black, observer), Set.of(), "move made");
+        makeMove(white, gameID, move, true, false, Set.of(black, observer), Set.of(), "move made");
     }
 
     @Test
@@ -263,7 +263,7 @@ public class WebSocketTests {
         joinGame(otherGameID, black2, ChessGame.TeamColor.BLACK);
         connectToGame(white2, otherGameID, true, Set.of(), Set.of(white, black, observer), "connect 1 to other game");
         connectToGame(black2, otherGameID, true, Set.of(white2), Set.of(white, black, observer), "connect 2 to other game");
-        connectToGame(observer2, otherGameID, true,  Set.of(white2, black2), Set.of(white, black, observer), "connect 3 to other game");
+        connectToGame(observer2, otherGameID, true, Set.of(white2, black2), Set.of(white, black, observer), "connect 3 to other game");
 
         //make move in first game - only users in first game should be notified
         ChessMove move = new ChessMove(new ChessPosition(2, 5), new ChessPosition(3, 5), null);
@@ -279,7 +279,7 @@ public class WebSocketTests {
     private void setupNormalGame() {
         connectToGame(white, gameID, true, Set.of(), Set.of(), "white player connect");
         connectToGame(black, gameID, true, Set.of(white), Set.of(), "black player connect");
-        connectToGame(observer, gameID, true,  Set.of(white, black), Set.of(), "observer connect");
+        connectToGame(observer, gameID, true, Set.of(white, black), Set.of(), "observer connect");
     }
 
     private WebsocketUser registerUser(String name, String password, String email) {
@@ -320,11 +320,10 @@ public class WebSocketTests {
         Map<String, Integer> numExpectedMessages = expectedMessages(sender, 1, inGame, (expectSuccess ? 2 : 0), otherClients);
         Map<String, List<TestMessage>> actualMessages = environment.exchange(sender.username(), moveCommand, numExpectedMessages, waitTime);
 
-        if(extraNotification && actualMessages.get(sender.username()).size() > 1) {
+        if (extraNotification && actualMessages.get(sender.username()).size() > 1) {
             assertCommandMessages(actualMessages, expectSuccess, sender, types(LOAD_GAME, NOTIFICATION),
                     inGame, types(LOAD_GAME, NOTIFICATION, NOTIFICATION), otherClients, description);
-        }
-        else {
+        } else {
             assertCommandMessages(actualMessages, expectSuccess, sender, types(LOAD_GAME),
                     inGame, types(LOAD_GAME, NOTIFICATION), otherClients, description);
         }
@@ -361,15 +360,15 @@ public class WebSocketTests {
                                        WebsocketUser user, ServerMessage.ServerMessageType[] userExpectedTypes,
                                        Set<WebsocketUser> inGame, ServerMessage.ServerMessageType[] inGameExpectedTypes,
                                        Set<WebsocketUser> otherClients, String description) {
-        if(!expectSuccess) {
+        if (!expectSuccess) {
             userExpectedTypes = new ServerMessage.ServerMessageType[]{ERROR};
             inGameExpectedTypes = new ServerMessage.ServerMessageType[0];
         }
         assertMessages(user.username(), userExpectedTypes, messages.get(user.username()), description);
-        for(WebsocketUser inGameUser : inGame) {
+        for (WebsocketUser inGameUser : inGame) {
             assertMessages(inGameUser.username(), inGameExpectedTypes, messages.get(inGameUser.username()), description);
         }
-        for(WebsocketUser otherUser : otherClients) {
+        for (WebsocketUser otherUser : otherClients) {
             assertMessages(otherUser.username(), new ServerMessage.ServerMessageType[0], messages.get(otherUser.username()), description);
         }
     }
@@ -380,14 +379,14 @@ public class WebSocketTests {
         Arrays.sort(expectedTypes);
         messages.sort(Comparator.comparing(TestMessage::getServerMessageType));
         try {
-            for(int i = 0; i < expectedTypes.length; i++) {
+            for (int i = 0; i < expectedTypes.length; i++) {
                 switch (expectedTypes[i]) {
                     case LOAD_GAME -> assertLoadGame(username, messages.get(i));
                     case NOTIFICATION -> assertNotification(username, messages.get(i));
                     case ERROR -> assertError(username, messages.get(i));
                 }
             }
-        } catch(AssertionError e) {
+        } catch (AssertionError e) {
             Assertions.fail("\nFor command '%s' user '%s' expected message types matching %s\nGot: %s\nCause: %s"
                     .formatted(description, username, Arrays.toString(expectedTypes), messages, e.getMessage()), e);
         }
@@ -430,5 +429,6 @@ public class WebSocketTests {
         return types;
     }
 
-    private record WebsocketUser(String username, String authToken) { }
+    private record WebsocketUser(String username, String authToken) {
+    }
 }

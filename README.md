@@ -1,6 +1,7 @@
 # ♕ BYU CS 240 Chess
 
-This project demonstrates mastery of proper software design, client/server architecture, networking using HTTP and WebSocket, database persistence, unit testing, serialization, and security.
+This project demonstrates mastery of proper software design, client/server architecture, networking using HTTP and
+WebSocket, database persistence, unit testing, serialization, and security.
 
 ## 10k Architecture Overview
 
@@ -14,11 +15,15 @@ The application has three modules.
 
 - **Client**: The command line program used to play a game of chess over the network.
 - **Server**: The command line program that listens for network requests from the client and manages users and games.
-- **Shared**: Code that is used by both the client and the server. This includes the rules of chess and tracking the state of a game.
+- **Shared**: Code that is used by both the client and the server. This includes the rules of chess and tracking the
+  state of a game.
 
 ## Starter Code
 
-As you create your chess application you will move through specific phases of development. This starts with implementing the moves of chess and finishes with sending game moves over the network between your client and server. You will start each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project. Do not copy a phases' starter code before you are ready to begin work on that phase.
+As you create your chess application you will move through specific phases of development. This starts with implementing
+the moves of chess and finishes with sending game moves over the network between your client and server. You will start
+each phase by copying course provided [starter-code](starter-code/) for that phase into the source code of the project.
+Do not copy a phases' starter code before you are ready to begin work on that phase.
 
 ## IntelliJ Support
 
@@ -29,7 +34,7 @@ Open the project directory in IntelliJ in order to develop, run, and debug your 
 You can use the following commands to build, test, package, and run your code.
 
 | Command                    | Description                                     |
-| -------------------------- | ----------------------------------------------- |
+|----------------------------|-------------------------------------------------|
 | `mvn compile`              | Builds the code                                 |
 | `mvn package`              | Run the tests and build an Uber jar file        |
 | `mvn package -DskipTests`  | Build an Uber jar file                          |
@@ -39,7 +44,9 @@ You can use the following commands to build, test, package, and run your code.
 | `mvn -pl client exec:java` | Build and run the client `Main`                 |
 | `mvn -pl server exec:java` | Build and run the server `Main`                 |
 
-These commands are configured by the `pom.xml` (Project Object Model) files. There is a POM file in the root of the project, and one in each of the modules. The root POM defines any global dependencies and references the module POM files.
+These commands are configured by the `pom.xml` (Project Object Model) files. There is a POM file in the root of the
+project, and one in each of the modules. The root POM defines any global dependencies and references the module POM
+files.
 
 ## Running the program using Java
 

@@ -80,8 +80,12 @@ public class ChessBoard {
     // === New methods ===
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChessBoard)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChessBoard)) {
+            return false;
+        }
         ChessBoard that = (ChessBoard) o;
 
         for (int row = 1; row <= 8; row++) {

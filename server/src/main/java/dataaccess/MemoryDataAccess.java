@@ -4,7 +4,9 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,7 +38,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String username) {
-        if (username == null) return null;
+        if (username == null) {
+            return null;
+        }
         return users.get(username);
     }
 
@@ -51,7 +55,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public AuthData getAuth(String authToken) {
-        if (authToken == null) return null;
+        if (authToken == null) {
+            return null;
+        }
         return auths.get(authToken);
     }
 
@@ -64,7 +70,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public int createGame(GameData game) throws DataAccessException {
-        if (game == null) throw new DataAccessException("null game");
+        if (game == null) {
+            throw new DataAccessException("null game");
+        }
         int id = nextGameId.getAndIncrement();
         GameData toStore = new GameData(
                 id,
@@ -89,7 +97,9 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
-        if (game == null) throw new DataAccessException("null game");
+        if (game == null) {
+            throw new DataAccessException("null game");
+        }
         if (!games.containsKey(game.gameID())) {
             throw new DataAccessException("no such game: " + game.gameID());
         }

@@ -22,13 +22,6 @@ public class UserGameCommand {
         this.gameID = gameID;
     }
 
-    public enum CommandType {
-        CONNECT,
-        MAKE_MOVE,
-        LEAVE,
-        RESIGN
-    }
-
     public CommandType getCommandType() {
         return commandType;
     }
@@ -57,5 +50,12 @@ public class UserGameCommand {
     @Override
     public int hashCode() {
         return Objects.hash(getCommandType(), getAuthToken(), getGameID());
+    }
+
+    public enum CommandType {
+        CONNECT,
+        MAKE_MOVE,
+        LEAVE,
+        RESIGN
     }
 }

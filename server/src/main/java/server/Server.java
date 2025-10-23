@@ -1,9 +1,13 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
 import io.javalin.Javalin;
-import dataaccess.*;
-import service.*;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
 
 public class Server {
 
@@ -94,15 +98,33 @@ public class Server {
         });
     }
 
-    public int run(int desiredPort) { javalin.start(desiredPort); return javalin.port(); }
-    public void stop() { javalin.stop(); }
+    public int run(int desiredPort) {
+        javalin.start(desiredPort);
+        return javalin.port();
+    }
 
-    record ErrorMsg(String message) {}
-    record Empty() {}
+    public void stop() {
+        javalin.stop();
+    }
 
-    public static record RegisterRequest(String username, String password, String email) {}
-    public static record LoginRequest(String username, String password) {}
-    public static record LogoutRequest(String authToken) {}
-    public static record CreateGameRequest(String gameName) {}
-    public static record JoinGameRequest(String playerColor, Integer gameID) {}
+    record ErrorMsg(String message) {
+    }
+
+    record Empty() {
+    }
+
+    public static record RegisterRequest(String username, String password, String email) {
+    }
+
+    public static record LoginRequest(String username, String password) {
+    }
+
+    public static record LogoutRequest(String authToken) {
+    }
+
+    public static record CreateGameRequest(String gameName) {
+    }
+
+    public static record JoinGameRequest(String playerColor, Integer gameID) {
+    }
 }

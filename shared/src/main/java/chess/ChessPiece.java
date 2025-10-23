@@ -1,6 +1,9 @@
 package chess;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -16,18 +19,6 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-    }
-
-    /**
-     * The various different chess piece options
-     */
-    public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
     }
 
     /**
@@ -169,7 +160,9 @@ public class ChessPiece {
             row += rowDir;
             col += colDir;
 
-            if (!isInBounds(row, col)) break;
+            if (!isInBounds(row, col)) {
+                break;
+            }
 
             ChessPosition newPos = new ChessPosition(row, col);
             ChessPiece pieceAt = board.getPiece(newPos);
@@ -199,8 +192,12 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChessPiece)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChessPiece)) {
+            return false;
+        }
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -213,5 +210,17 @@ public class ChessPiece {
     @Override
     public String toString() {
         return pieceColor + " " + type;
+    }
+
+    /**
+     * The various different chess piece options
+     */
+    public enum PieceType {
+        KING,
+        QUEEN,
+        BISHOP,
+        KNIGHT,
+        ROOK,
+        PAWN
     }
 }
