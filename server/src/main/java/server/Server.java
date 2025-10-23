@@ -18,61 +18,79 @@ public class Server {
     public Server() {
         javalin = Javalin.create(cfg -> cfg.staticFiles.add("web"));
 
-        // excpetion http mapping
+        // exception → http mapping
         javalin.exception(IllegalArgumentException.class, (e, ctx) ->
-                ctx.status(400).json(new ErrorMsg("Error: bad request")));
+                ctx.status(400)
+                        .result(gson.toJson(new ErrorMsg("Error: bad request")))
+                        .contentType("application/json"));
+
         javalin.exception(SecurityException.class, (e, ctx) -> {
             String msg = e.getMessage();
-            if ("already taken".equals(msg)) ctx.status(403).json(new ErrorMsg("Error: already taken"));
-            else ctx.status(401).json(new ErrorMsg("Error: unauthorized"));
+            if ("already taken".equals(msg)) {
+                ctx.status(403)
+                        .result(gson.toJson(new ErrorMsg("Error: already taken")))
+                        .contentType("application/json");
+            } else {
+                ctx.status(401)
+                        .result(gson.toJson(new ErrorMsg("Error: unauthorized")))
+                        .contentType("application/json");
+            }
         });
-        javalin.exception(DataAccessException.class, (e, ctx) ->
-                ctx.status(500).json(new ErrorMsg("Error: " + e.getMessage())));
-        javalin.exception(Exception.class, (e, ctx) ->
-                ctx.status(500).json(new ErrorMsg("Error: " + e.getMessage())));
 
-        // route
+        javalin.exception(DataAccessException.class, (e, ctx) ->
+                ctx.status(500)
+                        .result(gson.toJson(new ErrorMsg("Error: " + e.getMessage())))
+                        .contentType("application/json"));
+
+        javalin.exception(Exception.class, (e, ctx) ->
+                ctx.status(500)
+                        .result(gson.toJson(new ErrorMsg("Error: " + e.getMessage())))
+                        .contentType("application/json"));
+
+        // routes
         javalin.delete("/db", ctx -> {
             clearSvc.clear();
-            ctx.status(200).json(new Empty());
+            ctx.status(200)
+                    .result(gson.toJson(new Empty()))
+                    .contentType("application/json");
         });
 
         javalin.post("/user", ctx -> {
             var req = gson.fromJson(ctx.body(), RegisterRequest.class);
             var res = userSvc.register(req);
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
 
         javalin.post("/session", ctx -> {
             var req = gson.fromJson(ctx.body(), LoginRequest.class);
             var res = userSvc.login(req);
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
 
         javalin.delete("/session", ctx -> {
             var token = ctx.header("authorization");
             var res = userSvc.logout(new LogoutRequest(token));
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
 
         javalin.get("/game", ctx -> {
             var token = ctx.header("authorization");
             var res = gameSvc.list(token);
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
 
         javalin.post("/game", ctx -> {
             var token = ctx.header("authorization");
             var req = gson.fromJson(ctx.body(), CreateGameRequest.class);
             var res = gameSvc.create(token, req);
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
 
         javalin.put("/game", ctx -> {
             var token = ctx.header("authorization");
             var req = gson.fromJson(ctx.body(), JoinGameRequest.class);
             var res = gameSvc.join(token, req);
-            ctx.status(200).result(gson.toJson(res));
+            ctx.status(200).result(gson.toJson(res)).contentType("application/json");
         });
     }
 
