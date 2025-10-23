@@ -246,18 +246,15 @@ public class ChessGame {
 
         ChessPosition from = mv.getStartPosition();
         ChessPosition to = mv.getEndPosition();
-
         ChessPiece moving = b.getPiece(from);
         ChessPiece captured = b.getPiece(to);
 
         if (moving != null && moving.getPieceType() == ChessPiece.PieceType.KING
                 && from.getRow() == to.getRow()
                 && Math.abs(to.getColumn() - from.getColumn()) == 2) {
-
             int row = from.getRow();
             b.addPiece(from, null);
             b.addPiece(to, moving);
-
             if (to.getColumn() == 7) {
                 ChessPosition rookFrom = new ChessPosition(row, 8);
                 ChessPosition rookTo = new ChessPosition(row, 6);
@@ -278,7 +275,6 @@ public class ChessGame {
             }
             return;
         }
-
         boolean enPassant = false;
         if (moving != null && moving.getPieceType() == ChessPiece.PieceType.PAWN) {
             if (captured == null && enPassantTarget != null && to.equals(enPassantTarget)
@@ -290,7 +286,6 @@ public class ChessGame {
                 b.addPiece(pawnSquare, null);
             }
         }
-
         b.addPiece(from, null);
         ChessPiece.PieceType promo = mv.getPromotionPiece();
         if (promo != null && moving != null && moving.getPieceType() == ChessPiece.PieceType.PAWN) {
@@ -298,12 +293,10 @@ public class ChessGame {
         } else {
             b.addPiece(to, moving);
         }
-
         if (isReal) {
             ChessPiece capturedForFlags = enPassant
                     ? new ChessPiece(opposite(moving.getTeamColor()), ChessPiece.PieceType.PAWN)
                     : captured;
-
             updateCastlingRightsOnMove(from, to, moving, capturedForFlags);
 
 
@@ -359,7 +352,6 @@ public class ChessGame {
         if (piece.getPieceType() != ChessPiece.PieceType.KING) {
             return;
         }
-
         TeamColor team = piece.getTeamColor();
         int row = (team == TeamColor.WHITE) ? 1 : 8;
 
@@ -369,7 +361,6 @@ public class ChessGame {
         if (isInCheck(team)) {
             return;
         }
-
         if (canCastleKingSide(team)) {
             if (areEmpty(row, 6, 7) &&
                     !isSquareAttacked(board, opposite(team), new ChessPosition(row, 6)) &&
