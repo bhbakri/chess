@@ -1,20 +1,24 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import chess.ChessGame;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class SqlDataAccess implements DataAccess {
 
     private final DatabaseManager db;
     private final Gson gson = new Gson();
 
-    public SqlDataAccess(DatabaseManager db) { this.db = db; }
+    public SqlDataAccess(DatabaseManager db) {
+        this.db = db;
+    }
 
     //system
     @Override
@@ -35,7 +39,9 @@ public class SqlDataAccess implements DataAccess {
     //users
     @Override
     public void createUser(UserData u) throws DataAccessException {
-        if (u == null || u.username() == null) throw new DataAccessException("null user");
+        if (u == null || u.username() == null) {
+            throw new DataAccessException("null user");
+        }
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("INSERT INTO users(username,password,email) VALUES(?,?,?)")) {
             ps.setString(1, u.username());
@@ -50,7 +56,9 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
-        if (username == null) return null;
+        if (username == null) {
+            return null;
+        }
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("SELECT username,password,email FROM users WHERE username=?")) {
             ps.setString(1, username);
@@ -68,7 +76,9 @@ public class SqlDataAccess implements DataAccess {
     //auth
     @Override
     public void createAuth(AuthData a) throws DataAccessException {
-        if (a == null || a.authToken() == null) throw new DataAccessException("null auth");
+        if (a == null || a.authToken() == null) {
+            throw new DataAccessException("null auth");
+        }
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("INSERT INTO auth(authToken,username) VALUES(?,?)")) {
             ps.setString(1, a.authToken());
@@ -82,7 +92,9 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public AuthData getAuth(String token) throws DataAccessException {
-        if (token == null) return null;
+        if (token == null) {
+            return null;
+        }
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("SELECT authToken,username FROM auth WHERE authToken=?")) {
             ps.setString(1, token);
@@ -96,7 +108,9 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String token) throws DataAccessException {
-        if (token == null) return;
+        if (token == null) {
+            return;
+        }
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
             ps.setString(1, token);
@@ -110,14 +124,16 @@ public class SqlDataAccess implements DataAccess {
     // games
     @Override
     public int createGame(GameData g) throws DataAccessException {
-        if (g == null) throw new DataAccessException("null game");
+        if (g == null) {
+            throw new DataAccessException("null game");
+        }
         String json = gson.toJson(g.game() == null ? new ChessGame() : g.game());
 
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("""
-                   INSERT INTO games(whiteUsername,blackUsername,gameName,gameJson)
-                   VALUES(?,?,?,?)
-                """, Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT INTO games(whiteUsername,blackUsername,gameName,gameJson)
+                        VALUES(?,?,?,?)
+                     """, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, g.whiteUsername());
             ps.setString(2, g.blackUsername());
             ps.setString(3, g.gameName());
@@ -138,12 +154,14 @@ public class SqlDataAccess implements DataAccess {
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("""
-                 SELECT gameID, whiteUsername, blackUsername, gameName, gameJson
-                 FROM games WHERE gameID=?
-             """)) {
+                         SELECT gameID, whiteUsername, blackUsername, gameName, gameJson
+                         FROM games WHERE gameID=?
+                     """)) {
             ps.setInt(1, gameID);
             try (var rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 var game = gson.fromJson(rs.getString("gameJson"), ChessGame.class);
                 return new GameData(
                         rs.getInt("gameID"),
@@ -163,9 +181,9 @@ public class SqlDataAccess implements DataAccess {
         var out = new ArrayList<GameData>();
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("""
-                 SELECT gameID, whiteUsername, blackUsername, gameName, gameJson
-                 FROM games ORDER BY gameID
-             """);
+                         SELECT gameID, whiteUsername, blackUsername, gameName, gameJson
+                         FROM games ORDER BY gameID
+                     """);
              var rs = ps.executeQuery()) {
             while (rs.next()) {
                 var game = gson.fromJson(rs.getString("gameJson"), ChessGame.class);
@@ -185,21 +203,25 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void updateGame(GameData g) throws DataAccessException {
-        if (g == null) throw new DataAccessException("null game");
+        if (g == null) {
+            throw new DataAccessException("null game");
+        }
         String json = gson.toJson(g.game());
         try (var conn = db.getConnection();
              var ps = conn.prepareStatement("""
-                 UPDATE games
-                 SET whiteUsername=?, blackUsername=?, gameName=?, gameJson=?
-                 WHERE gameID=?
-             """)) {
+                         UPDATE games
+                         SET whiteUsername=?, blackUsername=?, gameName=?, gameJson=?
+                         WHERE gameID=?
+                     """)) {
             ps.setString(1, g.whiteUsername());
             ps.setString(2, g.blackUsername());
             ps.setString(3, g.gameName());
             ps.setString(4, json);
             ps.setInt(5, g.gameID());
             int rows = ps.executeUpdate();
-            if (rows == 0) throw new DataAccessException("no such game: " + g.gameID());
+            if (rows == 0) {
+                throw new DataAccessException("no such game: " + g.gameID());
+            }
             conn.commit();
         } catch (SQLException e) {
             throw new DataAccessException("updateGame: " + e.getMessage());

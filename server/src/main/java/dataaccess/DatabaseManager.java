@@ -1,6 +1,8 @@
 package dataaccess;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class DatabaseManager {
     private final String url;
@@ -21,32 +23,32 @@ public class DatabaseManager {
             try (var stmt = conn.createStatement()) {
                 // users
                 stmt.executeUpdate("""
-                    CREATE TABLE IF NOT EXISTS users(
-                      username TEXT PRIMARY KEY,
-                      password TEXT NOT NULL,
-                      email    TEXT NOT NULL
-                    );
-                """);
+                            CREATE TABLE IF NOT EXISTS users(
+                              username TEXT PRIMARY KEY,
+                              password TEXT NOT NULL,
+                              email    TEXT NOT NULL
+                            );
+                        """);
                 // auth
                 stmt.executeUpdate("""
-                    CREATE TABLE IF NOT EXISTS auth(
-                      authToken TEXT PRIMARY KEY,
-                      username  TEXT NOT NULL,
-                      FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE
-                    );
-                """);
+                            CREATE TABLE IF NOT EXISTS auth(
+                              authToken TEXT PRIMARY KEY,
+                              username  TEXT NOT NULL,
+                              FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE
+                            );
+                        """);
                 // games
                 stmt.executeUpdate("""
-                    CREATE TABLE IF NOT EXISTS games(
-                      gameID         INTEGER PRIMARY KEY AUTOINCREMENT,
-                      whiteUsername  TEXT,
-                      blackUsername  TEXT,
-                      gameName       TEXT NOT NULL,
-                      gameJson       TEXT NOT NULL,
-                      FOREIGN KEY(whiteUsername) REFERENCES users(username),
-                      FOREIGN KEY(blackUsername) REFERENCES users(username)
-                    );
-                """);
+                            CREATE TABLE IF NOT EXISTS games(
+                              gameID         INTEGER PRIMARY KEY AUTOINCREMENT,
+                              whiteUsername  TEXT,
+                              blackUsername  TEXT,
+                              gameName       TEXT NOT NULL,
+                              gameJson       TEXT NOT NULL,
+                              FOREIGN KEY(whiteUsername) REFERENCES users(username),
+                              FOREIGN KEY(blackUsername) REFERENCES users(username)
+                            );
+                        """);
             }
             conn.commit();
         } catch (Exception e) {

@@ -88,7 +88,7 @@ public class ChessBoardTests extends EqualsTestingUtility<ChessBoard> {
         boolean isWhite;
         for (int col = 1; col <= 8; col++) {
             for (int row = 1; row <= 8; row++) {
-                type = pieceSchedule[row-1];
+                type = pieceSchedule[row - 1];
                 isWhite = (row + col) % 2 == 0;
                 differentBoards.add(createBoardWithPiece(row, col, type, isWhite));
             }
