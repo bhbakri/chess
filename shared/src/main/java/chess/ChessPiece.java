@@ -42,21 +42,21 @@ public class ChessPiece {
         List<ChessMove> moves = new ArrayList<>();
 
         switch (type) {
-            case ROOK:
+            case ROOK: {
                 addSlidingMoves(board, position, moves, 1, 0);
                 addSlidingMoves(board, position, moves, -1, 0);
                 addSlidingMoves(board, position, moves, 0, 1);
                 addSlidingMoves(board, position, moves, 0, -1);
                 break;
-
-            case BISHOP:
+            }
+            case BISHOP: {
                 addSlidingMoves(board, position, moves, 1, 1);
                 addSlidingMoves(board, position, moves, 1, -1);
                 addSlidingMoves(board, position, moves, -1, 1);
                 addSlidingMoves(board, position, moves, -1, -1);
                 break;
-
-            case QUEEN:
+            }
+            case QUEEN: {
                 int[][] queenDirs = {
                         {1, 0}, {-1, 0}, {0, 1}, {0, -1},
                         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
@@ -65,38 +65,27 @@ public class ChessPiece {
                     addSlidingMoves(board, position, moves, d[0], d[1]);
                 }
                 break;
-
-            case KING:
+            }
+            case KING: {
                 int[][] kingDirs = {
                         {1, 0}, {-1, 0}, {0, 1}, {0, -1},
                         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
                 };
-                for (int[] d : kingDirs) {
-                    int newRow = position.getRow() + d[0];
-                    int newCol = position.getColumn() + d[1];
-                    if (isInBounds(newRow, newCol)) {
-                        addIfValid(board, position, moves, newRow, newCol);
-                    }
-                }
+                addDirectionalMoves(board, position, moves, kingDirs);
                 break;
-
-            case KNIGHT:
+            }
+            case KNIGHT: {
                 int[][] knightMoves = {
                         {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
                         {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
                 };
-                for (int[] d : knightMoves) {
-                    int newRow = position.getRow() + d[0];
-                    int newCol = position.getColumn() + d[1];
-                    if (isInBounds(newRow, newCol)) {
-                        addIfValid(board, position, moves, newRow, newCol);
-                    }
-                }
+                addDirectionalMoves(board, position, moves, knightMoves);
                 break;
-
-            case PAWN:
+            }
+            case PAWN: {
                 addPawnMoves(board, position, moves);
                 break;
+            }
         }
 
         return moves;
@@ -174,6 +163,18 @@ public class ChessPiece {
                     moves.add(new ChessMove(position, newPos, null));
                 }
                 break; // stop when blocked
+            }
+        }
+    }
+
+    // NEW: shared helper for KING/KNIGHT (removes duplicate loops)
+    private void addDirectionalMoves(ChessBoard board, ChessPosition position,
+                                     List<ChessMove> moves, int[][] deltas) {
+        for (int[] d : deltas) {
+            int newRow = position.getRow() + d[0];
+            int newCol = position.getColumn() + d[1];
+            if (isInBounds(newRow, newCol)) {
+                addIfValid(board, position, moves, newRow, newCol);
             }
         }
     }
