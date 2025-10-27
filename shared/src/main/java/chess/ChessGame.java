@@ -98,7 +98,6 @@ public class ChessGame {
         applyMove(board, move);
         toggleTurn();
     }
-
     // True if checked
     public boolean isInCheck(TeamColor teamColor) {
         if (teamColor == null) {
@@ -106,7 +105,6 @@ public class ChessGame {
         }
         return isInCheckOnBoard(board, teamColor);
     }
-
     // true if checkmate
     public boolean isInCheckmate(TeamColor teamColor) {
         if (teamColor == null) {
@@ -117,7 +115,6 @@ public class ChessGame {
         }
         return !hasAnyLegalMove(teamColor);
     }
-
     // stalemates the game
     public boolean isInStalemate(TeamColor teamColor) {
         if (teamColor == null) {
@@ -128,12 +125,10 @@ public class ChessGame {
         }
         return !hasAnyLegalMove(teamColor);
     }
-
     // actual board
     public ChessBoard getBoard() {
         return board;
     }
-
     // replaces the board
     public void setBoard(ChessBoard board) {
         this.board = (board != null) ? board : new ChessBoard();
@@ -141,7 +136,6 @@ public class ChessGame {
         whiteKingMoved = whiteQRookMoved = whiteKRookMoved = false;
         blackKingMoved = blackQRookMoved = blackKRookMoved = false;
     }
-
     // checks if any remaining legal movies are preset
     private boolean hasAnyLegalMove(TeamColor team) {
         for (int r = 1; r <= 8; r++) {
@@ -160,22 +154,17 @@ public class ChessGame {
         }
         return false;
     }
-
     //helper functions VVVVV
-
     // checks if a color is checked
     private boolean isInCheckOnBoard(ChessBoard b, TeamColor team) {
         if (b == null) {
             return false;
         }
-
         ChessPosition king = findKing(b, team);
         if (king == null) {
             return false;
         }
-
         TeamColor enemy = opposite(team);
-
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition p = new ChessPosition(r, c);
@@ -198,7 +187,6 @@ public class ChessGame {
         }
         return false;
     }
-
     // finds the king for a color
     private ChessPosition findKing(ChessBoard b, TeamColor team) {
         for (int r = 1; r <= 8; r++) {
@@ -218,7 +206,6 @@ public class ChessGame {
         }
         return null;
     }
-
     // copies the board
     private ChessBoard copyBoard(ChessBoard src) {
         ChessBoard dst = new ChessBoard();
@@ -235,20 +222,16 @@ public class ChessGame {
         }
         return dst;
     }
-
     //hanldes all the chess moves
     private void applyMove(ChessBoard b, ChessMove mv) {
         if (b == null || mv == null) {
             return;
         }
-
         boolean isReal = (b == this.board);
-
         ChessPosition from = mv.getStartPosition();
         ChessPosition to = mv.getEndPosition();
         ChessPiece moving = b.getPiece(from);
         ChessPiece captured = b.getPiece(to);
-
         if (moving != null && moving.getPieceType() == ChessPiece.PieceType.KING
                 && from.getRow() == to.getRow()
                 && Math.abs(to.getColumn() - from.getColumn()) == 2) {
@@ -298,8 +281,6 @@ public class ChessGame {
                     ? new ChessPiece(opposite(moving.getTeamColor()), ChessPiece.PieceType.PAWN)
                     : captured;
             updateCastlingRightsOnMove(from, to, moving, capturedForFlags);
-
-
             if (moving != null && moving.getPieceType() == ChessPiece.PieceType.PAWN) {
                 int delta = Math.abs(to.getRow() - from.getRow());
                 if (delta == 2) {
@@ -368,7 +349,6 @@ public class ChessGame {
                 out.add(new ChessMove(start, new ChessPosition(row, 7), null));
             }
         }
-
         if (canCastleQueenSide(team)) {
             if (areEmpty(row, 2, 3, 4) &&
                     !isSquareAttacked(board, opposite(team), new ChessPosition(row, 4)) &&
