@@ -22,7 +22,7 @@ public class Server {
     private final GameService gameSvc = new GameService(dao);
 
     public Server() {
-        // ---- DB + tables on startup (Phase 4 requirement) ----
+        //New for server initializning
         try {
             DbInitializer.init();
         } catch (Exception e) {
