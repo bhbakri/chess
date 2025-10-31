@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.DbInitializer; // <-- added
 import io.javalin.Javalin;
 import service.ClearService;
 import service.GameService;
@@ -14,12 +15,21 @@ public class Server {
     private final Javalin javalin;
     private final Gson gson = new Gson();
 
+    // For now keep in-memory; later swap to your MySQL DAO implementation.
     private final DataAccess dao = new MemoryDataAccess();
     private final ClearService clearSvc = new ClearService(dao);
     private final UserService userSvc = new UserService(dao);
     private final GameService gameSvc = new GameService(dao);
 
     public Server() {
+        // ---- DB + tables on startup (Phase 4 requirement) ----
+        try {
+            DbInitializer.init();
+        } catch (Exception e) {
+            throw new RuntimeException("Database initialization failed", e);
+        }
+        // -------------------------------------------------------
+
         javalin = Javalin.create(cfg -> cfg.staticFiles.add("web"));
 
         // exception → http mapping
@@ -107,24 +117,12 @@ public class Server {
         javalin.stop();
     }
 
-    record ErrorMsg(String message) {
-    }
+    record ErrorMsg(String message) {}
+    record Empty() {}
 
-    record Empty() {
-    }
-
-    public static record RegisterRequest(String username, String password, String email) {
-    }
-
-    public static record LoginRequest(String username, String password) {
-    }
-
-    public static record LogoutRequest(String authToken) {
-    }
-
-    public static record CreateGameRequest(String gameName) {
-    }
-
-    public static record JoinGameRequest(String playerColor, Integer gameID) {
-    }
+    public static record RegisterRequest(String username, String password, String email) {}
+    public static record LoginRequest(String username, String password) {}
+    public static record LogoutRequest(String authToken) {}
+    public static record CreateGameRequest(String gameName) {}
+    public static record JoinGameRequest(String playerColor, Integer gameID) {}
 }
