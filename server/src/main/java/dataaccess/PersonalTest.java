@@ -3,7 +3,7 @@ package dataaccess;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class test {
+public class PersonalTest {
     @Test
     void canConnect() throws Exception {
         try (var conn = DatabaseManager.getConnection();

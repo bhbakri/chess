@@ -1,9 +1,11 @@
 package dataaccess;
+
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +28,7 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    //users
+    // users
     @Override
     public void createUser(UserData user) throws DataAccessException {
         final String sql = "INSERT INTO user (username, passwordHash, email) VALUES (?,?,?)";
@@ -48,7 +50,9 @@ public class MySqlDataAccess implements DataAccess {
              var ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (var rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 return new UserData(
                         rs.getString("username"),
                         rs.getString("passwordHash"),
@@ -60,7 +64,7 @@ public class MySqlDataAccess implements DataAccess {
         }
     }
 
-    //auth
+    // auth
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         final String sql = "INSERT INTO auth (token, username) VALUES (?,?)";
@@ -81,7 +85,9 @@ public class MySqlDataAccess implements DataAccess {
              var ps = conn.prepareStatement(sql)) {
             ps.setString(1, authToken);
             try (var rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 return new AuthData(
                         rs.getString("token"),
                         rs.getString("username")
@@ -121,7 +127,9 @@ public class MySqlDataAccess implements DataAccess {
             ps.executeUpdate();
 
             try (var keys = ps.getGeneratedKeys()) {
-                if (keys.next()) return keys.getInt(1);
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
             throw new DataAccessException("createGame: no generated key");
         } catch (Exception e) {
@@ -136,7 +144,9 @@ public class MySqlDataAccess implements DataAccess {
              var ps = conn.prepareStatement(sql)) {
             ps.setInt(1, gameID);
             try (var rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
 
                 ChessGame cg = GSON.fromJson(rs.getString("gameJson"), ChessGame.class);
 
@@ -153,7 +163,6 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("getGame failed", e);
         }
     }
-
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
@@ -178,7 +187,6 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("listGames failed", e);
         }
     }
-
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
