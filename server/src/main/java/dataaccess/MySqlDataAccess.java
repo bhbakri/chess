@@ -139,14 +139,14 @@ public class MySqlDataAccess implements DataAccess {
             try (var rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
 
-                // Deserialize JSON -> ChessGame
                 ChessGame cg = GSON.fromJson(rs.getString("gameJson"), ChessGame.class);
 
+                // (id, white, black, name, game)
                 return new GameData(
                         rs.getInt("id"),
-                        rs.getString("name"),
                         rs.getString("whiteUsername"),
                         rs.getString("blackUsername"),
+                        rs.getString("name"),
                         cg
                 );
             }
@@ -154,6 +154,7 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("getGame failed", e);
         }
     }
+
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
@@ -164,11 +165,12 @@ public class MySqlDataAccess implements DataAccess {
              var rs = ps.executeQuery()) {
             while (rs.next()) {
                 ChessGame cg = GSON.fromJson(rs.getString("gameJson"), ChessGame.class);
+                // (id, white, black, name, game)
                 out.add(new GameData(
                         rs.getInt("id"),
-                        rs.getString("name"),
                         rs.getString("whiteUsername"),
                         rs.getString("blackUsername"),
+                        rs.getString("name"),
                         cg
                 ));
             }
@@ -177,6 +179,7 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("listGames failed", e);
         }
     }
+
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {

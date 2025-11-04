@@ -3,8 +3,9 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MySqlDataAccess;
 import dataaccess.MemoryDataAccess;
-import dataaccess.DbInitializer; // <-- added
+import dataaccess.DbInitializer;
 import io.javalin.Javalin;
 import service.ClearService;
 import service.GameService;
@@ -16,7 +17,7 @@ public class Server {
     private final Gson gson = new Gson();
 
     // For now keep in-memory; later swap to your MySQL DAO implementation.
-    private final DataAccess dao = new MemoryDataAccess();
+    private final DataAccess dao = new MySqlDataAccess();
     private final ClearService clearSvc = new ClearService(dao);
     private final UserService userSvc = new UserService(dao);
     private final GameService gameSvc = new GameService(dao);
