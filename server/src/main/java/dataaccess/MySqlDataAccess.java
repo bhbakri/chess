@@ -32,9 +32,8 @@ public class MySqlDataAccess implements DataAccess {
         final String sql = "INSERT INTO user (username, passwordHash, email) VALUES (?,?,?)";
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(sql)) {
-            // If your UserData accessor for the hash is named differently, change user.password() accordingly.
             ps.setString(1, user.username());
-            ps.setString(2, user.password());
+            ps.setString(2, user.passwordHash());
             ps.setString(3, user.email());
             ps.executeUpdate();
         } catch (Exception e) {

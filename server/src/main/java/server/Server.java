@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MySqlDataAccess;
-import dataaccess.MemoryDataAccess;
+//import dataaccess.MemoryDataAccess;
 import dataaccess.DbInitializer;
 import io.javalin.Javalin;
 import service.ClearService;
