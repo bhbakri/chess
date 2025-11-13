@@ -1,28 +1,36 @@
 package ui;
 
 import client.ServerFacade;
+
 import java.util.Locale;
 import java.util.Scanner;
+
 import static ui.EscapeSequences.*;
 
 public class ClientApp {
+
     enum Mode { PRELOGIN, POSTLOGIN }
 
     private final Scanner in = new Scanner(System.in);
     private final ServerFacade facade;
     private Mode mode = Mode.PRELOGIN;
     private String username;
-    
-    public ClientApp(int port) { this.facade = new ServerFacade(port); }
+
+    public ClientApp(int port) {
+        this.facade = new ServerFacade(port);
+    }
 
     public void run() {
         System.out.println(SET_TEXT_BOLD + "Welcome to 240 Chess" + RESET_TEXT_BOLD_FAINT);
         while (true) {
             try {
-                if (mode == Mode.PRELOGIN) prelogin();
-                else postloginPlaceholder();
+                if (mode == Mode.PRELOGIN) {
+                    prelogin();
+                } else {
+                    postloginPlaceholder();
+                }
             } catch (Exception ex) {
-                // Friendly error (no stack traces or codes)
+                // Friendly error only (no stack traces or status codes)
                 System.out.println(SET_TEXT_COLOR_RED + ex.getMessage() + RESET_TEXT_COLOR);
             }
         }
@@ -43,9 +51,13 @@ public class ClientApp {
                 """);
 
             case "register" -> {
-                System.out.print("username: "); var u = in.nextLine().trim();
-                System.out.print("password: "); var p = in.nextLine().trim();
-                System.out.print("email   : "); var e = in.nextLine().trim();
+                System.out.print("username: ");
+                var u = in.nextLine().trim();
+                System.out.print("password: ");
+                var p = in.nextLine().trim();
+                System.out.print("email   : ");
+                var e = in.nextLine().trim();
+
                 var auth = facade.register(u, p, e);
                 username = auth.username();
                 mode = Mode.POSTLOGIN;
@@ -53,8 +65,11 @@ public class ClientApp {
             }
 
             case "login" -> {
-                System.out.print("username: "); var u = in.nextLine().trim();
-                System.out.print("password: "); var p = in.nextLine().trim();
+                System.out.print("username: ");
+                var u = in.nextLine().trim();
+                System.out.print("password: ");
+                var p = in.nextLine().trim();
+
                 var auth = facade.login(u, p);
                 username = auth.username();
                 mode = Mode.POSTLOGIN;
@@ -70,7 +85,7 @@ public class ClientApp {
         }
     }
 
-    // Placeholder
+    // TEMP for now – we’ll flesh this out in the next step
     private void postloginPlaceholder() throws Exception {
         System.out.println("(postlogin placeholder) Type 'logout' to return to prelogin.");
         var cmd = in.nextLine().trim().toLowerCase(Locale.ROOT);
