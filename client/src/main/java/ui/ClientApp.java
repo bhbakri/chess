@@ -11,10 +11,10 @@ import static ui.EscapeSequences.*;
 
 public class ClientApp {
 
-    // NOTE:
-    // This client is still in an early prototype state (about 1/3 done).
-    // Only basic login / logout flows are wired up.
-    // Game commands (create/list/play/observe) are not implemented yet.
+    // Progress note:
+    // - Login / logout: implemented
+    // - Game creation / listing / joining / observing: implemented
+    // - In-game command loop & board rendering: NOT done yet (next step)
 
     enum Mode { PRELOGIN, POSTLOGIN }
 
@@ -24,12 +24,11 @@ public class ClientApp {
     private String username;
 
     // Games from the last 'list' call, to map number -> game
-    // TODO(step-2): actually populate this list from the server
     private List<ServerFacade.GameInfo> lastGames = new ArrayList<>();
 
     public ClientApp(int port) {
         this.facade = new ServerFacade(port);
-        // TODO(step-1): support reading host/port from args or config
+        // TODO: allow specifying host/port via command-line args or config file
     }
 
     public void run() {
@@ -44,12 +43,12 @@ public class ClientApp {
             } catch (Exception ex) {
                 // Friendly error only (no stack trace / status codes)
                 System.out.println(SET_TEXT_COLOR_RED + ex.getMessage() + RESET_TEXT_COLOR);
-                // TODO(step-3): add optional debug mode to show stack traces
+                // TODO: optional debug mode flag to show stack traces
             }
         }
     }
 
-    // ================= PRELOGIN (mostly working) =================
+    // ================= PRELOGIN =================
 
     private void prelogin() throws Exception {
         System.out.print(SET_TEXT_FAINT + "[prelogin] " + RESET_TEXT_BOLD_FAINT +
@@ -60,7 +59,6 @@ public class ClientApp {
             case "help" -> printPreloginHelp();
 
             case "register" -> {
-                // TODO(step-2): basic input validation (non-empty, email format, etc.)
                 System.out.print("username: ");
                 var u = in.nextLine().trim();
                 System.out.print("password: ");
@@ -68,6 +66,7 @@ public class ClientApp {
                 System.out.print("email   : ");
                 var e = in.nextLine().trim();
 
+                // TODO: validation (non-empty, email format, min password length, etc.)
                 var auth = facade.register(u, p, e);
                 username = auth.username();
                 mode = Mode.POSTLOGIN;
@@ -103,13 +102,13 @@ public class ClientApp {
               login       Log in with an existing account
               quit        Exit the program
 
-            TODO (later steps):
-              - Remember last logged-in user
-              - Add command history / nicer prompt
+            TODO (later):
+              - More helpful error messages
+              - Remember last username
             """);
     }
 
-    // ================= POSTLOGIN (early stub) =================
+    // ================= POSTLOGIN =================
 
     private void postlogin() throws Exception {
         System.out.print(SET_TEXT_FAINT + "[postlogin] " + RESET_TEXT_BOLD_FAINT +
@@ -119,14 +118,10 @@ public class ClientApp {
         switch (cmd) {
             case "help" -> printPostloginHelp();
             case "logout" -> doLogout();
-
-            // The rest of the commands are just placeholders for now.
-            case "create", "list", "play", "observe" -> {
-                System.out.println(SET_TEXT_COLOR_YELLOW +
-                        "Game features are not implemented yet (TODO in later steps)." +
-                        RESET_TEXT_COLOR);
-            }
-
+            case "create" -> doCreateGame();
+            case "list" -> doListGames();
+            case "play" -> doPlayGame();
+            case "observe" -> doObserveGame();
             default -> System.out.println("Unknown command. Type 'help'.");
         }
     }
@@ -135,20 +130,19 @@ public class ClientApp {
         System.out.println("""
             Commands:
               help        Show this help
-              logout      Log out to prelogin menu
-
-            TODO (future steps):
               create      Create a new game
               list        List existing games
               play        Join a game as WHITE or BLACK (by number)
               observe     Observe a game (by number)
+              logout      Log out to prelogin menu
 
-            NOTE: Game-related commands are not wired up yet.
+            TODO (next steps):
+              - In-game command loop (moves, resign, draw, refresh)
+              - Live board rendering and updates
             """);
     }
 
     private void doLogout() throws Exception {
-        // TODO(step-2): handle case where logout fails (expired token, etc.)
         facade.logout();
         username = null;
         mode = Mode.PRELOGIN;
@@ -156,49 +150,85 @@ public class ClientApp {
         System.out.println("Logged out.");
     }
 
-    // ================= Game-related stubs (not implemented yet) =================
-    // These methods are placeholders to show intended structure but are deliberately
-    // not finished. They should be implemented in later steps of the assignment.
-
-    /**
-     * TODO(step-3): Implement game creation via facade.createGame(name)
-     */
-    @SuppressWarnings("unused")
     private void doCreateGame() throws Exception {
-        throw new UnsupportedOperationException("create game not implemented yet");
+        System.out.print("Game name: ");
+        var name = in.nextLine().trim();
+        if (name.isEmpty()) {
+            System.out.println("Please enter a non-empty game name.");
+            return;
+        }
+        int id = facade.createGame(name);
+        // We do NOT show gameID to the user, per spec
+        System.out.println("Created game \"" + name + "\".");
+        // TODO: optionally auto-refresh list or auto-join as white
+        // (gameID: " + id + ") <- keep hidden unless spec changes
     }
 
-    /**
-     * TODO(step-3): Call facade.listGames() and render them into lastGames
-     */
-    @SuppressWarnings("unused")
     private void doListGames() throws Exception {
-        throw new UnsupportedOperationException("list games not implemented yet");
+        lastGames = facade.listGames();
+        if (lastGames.isEmpty()) {
+            System.out.println("No games exist yet. Use 'create' to make one.");
+            return;
+        }
+
+        System.out.println(SET_TEXT_UNDERLINE + "Games" + RESET_TEXT_UNDERLINE);
+        for (int i = 0; i < lastGames.size(); i++) {
+            var g = lastGames.get(i);
+            var white = g.whiteUsername() == null ? "-" : g.whiteUsername();
+            var black = g.blackUsername() == null ? "-" : g.blackUsername();
+            System.out.printf("%d) %s  [W: %s | B: %s]%n",
+                    i + 1, g.gameName(), white, black);
+        }
+
+        // TODO: show additional game metadata (e.g., in-progress/finished)
     }
 
-    /**
-     * TODO(step-4): Join a game as WHITE/BLACK and open an interactive board view
-     */
-    @SuppressWarnings("unused")
     private void doPlayGame() throws Exception {
-        throw new UnsupportedOperationException("play game not implemented yet");
+        if (lastGames.isEmpty()) {
+            System.out.println("First run 'list' and choose a game number.");
+            return;
+        }
+
+        int index = askGameIndex("Game number");
+        var game = lastGames.get(index);
+
+        System.out.print("Color (WHITE/BLACK): ");
+        var color = in.nextLine().trim().toUpperCase(Locale.ROOT);
+        if (!color.equals("WHITE") && !color.equals("BLACK")) {
+            System.out.println("Please type WHITE or BLACK.");
+            return;
+        }
+
+        facade.joinGame(game.gameID(), color);
+        System.out.println("Joined \"" + game.gameName() + "\" as " + color + ".");
+
+        // TODO: Start in-game loop (board UI + commands)
+        // e.g. inGameLoop(game.gameID(), color);
+        System.out.println(SET_TEXT_FAINT +
+                "(In-game commands and board view will be added in the next step.)" +
+                RESET_TEXT_BOLD_FAINT);
     }
 
-    /**
-     * TODO(step-4): Join a game as an observer and open read-only board view
-     */
-    @SuppressWarnings("unused")
     private void doObserveGame() throws Exception {
-        throw new UnsupportedOperationException("observe game not implemented yet");
+        if (lastGames.isEmpty()) {
+            System.out.println("First run 'list' and choose a game number.");
+            return;
+        }
+
+        int index = askGameIndex("Game number");
+        var game = lastGames.get(index);
+
+        facade.joinGame(game.gameID(), null); // null color = observer
+        System.out.println("Observing \"" + game.gameName() + "\".");
+
+        // TODO: Start observer view (read-only board + refresh)
+        System.out.println(SET_TEXT_FAINT +
+                "(Observer board view will be added in the next step.)" +
+                RESET_TEXT_BOLD_FAINT);
     }
 
-    // ================= Helpers (will be used once list/play/observe exist) =================
+    // ================= Helpers =================
 
-    /**
-     * TODO(step-3): Use this helper from doPlayGame / doObserveGame
-     * once the list of games is actually retrieved.
-     */
-    @SuppressWarnings("unused")
     private int askGameIndex(String prompt) {
         while (true) {
             try {
@@ -215,4 +245,4 @@ public class ClientApp {
             }
         }
     }
-}
+    
