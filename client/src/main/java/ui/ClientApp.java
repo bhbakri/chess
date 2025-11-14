@@ -11,11 +11,6 @@ import static ui.EscapeSequences.*;
 
 public class ClientApp {
 
-    // Progress note:
-    // - Login / logout: implemented
-    // - Game creation / listing / joining / observing: implemented
-    // - In-game command loop & board rendering: NOT done yet (next step)
-
     enum Mode { PRELOGIN, POSTLOGIN }
 
     private final Scanner in = new Scanner(System.in);
@@ -28,7 +23,6 @@ public class ClientApp {
 
     public ClientApp(int port) {
         this.facade = new ServerFacade(port);
-        // TODO: allow specifying host/port via command-line args or config file
     }
 
     public void run() {
@@ -43,7 +37,6 @@ public class ClientApp {
             } catch (Exception ex) {
                 // Friendly error only (no stack trace / status codes)
                 System.out.println(SET_TEXT_COLOR_RED + ex.getMessage() + RESET_TEXT_COLOR);
-                // TODO: optional debug mode flag to show stack traces
             }
         }
     }
@@ -66,7 +59,6 @@ public class ClientApp {
                 System.out.print("email   : ");
                 var e = in.nextLine().trim();
 
-                // TODO: validation (non-empty, email format, min password length, etc.)
                 var auth = facade.register(u, p, e);
                 username = auth.username();
                 mode = Mode.POSTLOGIN;
@@ -101,10 +93,6 @@ public class ClientApp {
               register    Create a new account and log in
               login       Log in with an existing account
               quit        Exit the program
-
-            TODO (later):
-              - More helpful error messages
-              - Remember last username
             """);
     }
 
@@ -135,10 +123,6 @@ public class ClientApp {
               play        Join a game as WHITE or BLACK (by number)
               observe     Observe a game (by number)
               logout      Log out to prelogin menu
-
-            TODO (next steps):
-              - In-game command loop (moves, resign, draw, refresh)
-              - Live board rendering and updates
             """);
     }
 
@@ -158,10 +142,8 @@ public class ClientApp {
             return;
         }
         int id = facade.createGame(name);
-        // We do NOT show gameID to the user, per spec
         System.out.println("Created game \"" + name + "\".");
-        // TODO: optionally auto-refresh list or auto-join as white
-        // (gameID: " + id + ") <- keep hidden unless spec changes
+        // We do NOT show gameID to the user, per spec
     }
 
     private void doListGames() throws Exception {
@@ -179,8 +161,6 @@ public class ClientApp {
             System.out.printf("%d) %s  [W: %s | B: %s]%n",
                     i + 1, g.gameName(), white, black);
         }
-
-        // TODO: show additional game metadata (e.g., in-progress/finished)
     }
 
     private void doPlayGame() throws Exception {
@@ -202,10 +182,10 @@ public class ClientApp {
         facade.joinGame(game.gameID(), color);
         System.out.println("Joined \"" + game.gameName() + "\" as " + color + ".");
 
-        // TODO: Start in-game loop (board UI + commands)
-        // e.g. inGameLoop(game.gameID(), color);
+        // Board drawing will be hooked in Step 5:
+        // BoardPrinter.drawInitial(color.equals("BLACK"));
         System.out.println(SET_TEXT_FAINT +
-                "(In-game commands and board view will be added in the next step.)" +
+                "(Board drawing will appear once we add it in the next step.)" +
                 RESET_TEXT_BOLD_FAINT);
     }
 
@@ -221,9 +201,10 @@ public class ClientApp {
         facade.joinGame(game.gameID(), null); // null color = observer
         System.out.println("Observing \"" + game.gameName() + "\".");
 
-        // TODO: Start observer view (read-only board + refresh)
+        // Board drawing will be white perspective for observers
+        // BoardPrinter.drawInitial(false);
         System.out.println(SET_TEXT_FAINT +
-                "(Observer board view will be added in the next step.)" +
+                "(Board drawing will appear once we add it in the next step.)" +
                 RESET_TEXT_BOLD_FAINT);
     }
 
@@ -245,4 +226,4 @@ public class ClientApp {
             }
         }
     }
-    
+}
