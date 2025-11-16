@@ -8,42 +8,58 @@ public class BoardPrinter {
     private static final String LIGHT = SET_BG_COLOR_LIGHT_GREY;
     private static final String DARK  = SET_BG_COLOR_DARK_GREEN;
 
+    private static final String[] FILES = {"a","b","c","d","e","f","g","h"};
+
     // Single-character piece symbols so width is consistent
     private static String pieceSymbol(int file, int rank) {
-        // White pieces (bottom)
-        if (rank == 2) return "P";
-        if (rank == 1) {
-            return switch (file) {
-                case 1, 8 -> "R";
-                case 2, 7 -> "N";
-                case 3, 6 -> "B";
-                case 4     -> "Q";
-                case 5     -> "K";
-                default    -> " ";
-            };
+        // Pawns
+        if (rank == 2 || rank == 7) {
+            return "P";
         }
 
-        // Black pieces (top)
-        if (rank == 7) return "P";
-        if (rank == 8) {
-            return switch (file) {
-                case 1, 8 -> "R";
-                case 2, 7 -> "N";
-                case 3, 6 -> "B";
-                case 4     -> "Q";
-                case 5     -> "K";
-                default    -> " ";
-            };
+        // Back ranks (white rank 1, black rank 8)
+        if (rank == 1 || rank == 8) {
+            return backRankPiece(file);
         }
 
+        // Empty squares
         return " ";
+    }
+
+    private static String backRankPiece(int file) {
+        return switch (file) {
+            case 1, 8 -> "R";
+            case 2, 7 -> "N";
+            case 3, 6 -> "B";
+            case 4     -> "Q";
+            case 5     -> "K";
+            default    -> " ";
+        };
     }
 
     // Color white pieces red, black pieces blue
     private static String pieceColor(int file, int rank) {
-        if (rank == 1 || rank == 2) return SET_TEXT_COLOR_RED;   // white
-        if (rank == 7 || rank == 8) return SET_TEXT_COLOR_BLUE;  // black
+        if (rank == 1 || rank == 2) {
+            return SET_TEXT_COLOR_RED;   // white
+        }
+        if (rank == 7 || rank == 8) {
+            return SET_TEXT_COLOR_BLUE;  // black
+        }
         return null;
+    }
+
+    private static void printFileLabels(boolean blackPerspective) {
+        System.out.print("   ");
+        if (!blackPerspective) {
+            for (String f : FILES) {
+                System.out.print(" " + f + " ");
+            }
+        } else {
+            for (int i = FILES.length - 1; i >= 0; i--) {
+                System.out.print(" " + FILES[i] + " ");
+            }
+        }
+        System.out.println();
     }
 
     /** Draws the initial board. blackPerspective = true if viewing as black. */
@@ -51,18 +67,8 @@ public class BoardPrinter {
         System.out.print(ERASE_SCREEN);
         System.out.println();
 
-        String[] files = {"a","b","c","d","e","f","g","h"};
-
         // Top file labels
-        System.out.print("   ");
-        if (!blackPerspective) {
-            for (String f : files) System.out.print(" " + f + " ");
-        } else {
-            for (int i = files.length - 1; i >= 0; i--) {
-                System.out.print(" " + files[i] + " ");
-            }
-        }
-        System.out.println();
+        printFileLabels(blackPerspective);
 
         // Each board row
         for (int row = 0; row < 8; row++) {
@@ -99,14 +105,8 @@ public class BoardPrinter {
         }
 
         // Bottom file labels
-        System.out.print("   ");
-        if (!blackPerspective) {
-            for (String f : files) System.out.print(" " + f + " ");
-        } else {
-            for (int i = files.length - 1; i >= 0; i--) {
-                System.out.print(" " + files[i] + " ");
-            }
-        }
+        printFileLabels(blackPerspective);
+
         System.out.println(RESET_BG_COLOR + RESET_TEXT_COLOR);
     }
 }

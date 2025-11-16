@@ -29,7 +29,9 @@ public class ServerFacade {
     // helper
     private HttpRequest.Builder base(String path) {
         var b = HttpRequest.newBuilder(URI.create(baseUrl + path));
-        if (authToken != null) b.header("Authorization", authToken);
+        if (authToken != null) {
+            b.header("Authorization", authToken);
+        }
         return b;
     }
 
