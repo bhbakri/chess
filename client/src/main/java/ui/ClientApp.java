@@ -181,7 +181,7 @@ public class ClientApp {
         facade.joinGame(game.gameID(), color);
         System.out.println("Joined \"" + game.gameName() + "\" as " + color + ".");
 
-        // Draw initial board: black perspective
+        // Draw initial board: black perspective if joining as BLACK
         BoardPrinter.drawInitial(color.equals("BLACK"));
     }
 
@@ -194,9 +194,11 @@ public class ClientApp {
         int index = askGameIndex("Game number");
         var game = lastGames.get(index);
 
-        facade.joinGame(game.gameID(), null); // null color = observer
+        // Use special color value "OBSERVER" (server interprets this as observer)
+        facade.joinGame(game.gameID(), "OBSERVER");
         System.out.println("Observing \"" + game.gameName() + "\".");
 
+        // Observers see white perspective
         BoardPrinter.drawInitial(false);
     }
 
