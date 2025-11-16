@@ -41,8 +41,8 @@ public class GameService {
 
     public EmptyResult join(String token, server.Server.JoinGameRequest r) throws DataAccessException {
         String username = requireAuth(token);
-
-        if (r == null || r.gameID() == null) {
+        
+        if (r == null || r.gameID() == null || r.playerColor() == null) {
             throw new IllegalArgumentException("bad request");
         }
 
@@ -51,14 +51,15 @@ public class GameService {
             throw new IllegalArgumentException("bad request");
         }
 
-        if (r.playerColor() == null) {
-            return new EmptyResult();
-        }
-
         String color = r.playerColor().toUpperCase();
         String white = game.whiteUsername();
         String black = game.blackUsername();
 
+        if ("OBSERVER".equals(color)) {
+            return new EmptyResult();
+        }
+
+        // Player join: WHITE or BLACK
         if ("WHITE".equals(color)) {
             if (white != null) {
                 throw new SecurityException("already taken");
@@ -70,6 +71,7 @@ public class GameService {
             }
             black = username;
         } else {
+            // Any other color string is a bad request (this is what the bad-color test checks)
             throw new IllegalArgumentException("bad request");
         }
 
