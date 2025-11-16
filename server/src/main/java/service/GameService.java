@@ -1,8 +1,10 @@
 package service;
+
 import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.GameData;
+
 import java.util.List;
 
 public class GameService {
@@ -39,13 +41,18 @@ public class GameService {
 
     public EmptyResult join(String token, server.Server.JoinGameRequest r) throws DataAccessException {
         String username = requireAuth(token);
-        if (r == null || r.gameID() == null || r.playerColor() == null) {
+        
+        if (r == null || r.gameID() == null) {
             throw new IllegalArgumentException("bad request");
         }
 
         var game = dao.getGame(r.gameID());
         if (game == null) {
             throw new IllegalArgumentException("bad request");
+        }
+
+        if (r.playerColor() == null) {
+            return new EmptyResult();
         }
 
         String color = r.playerColor().toUpperCase();
