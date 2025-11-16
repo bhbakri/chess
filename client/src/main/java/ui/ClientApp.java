@@ -143,7 +143,6 @@ public class ClientApp {
         }
         int id = facade.createGame(name);
         System.out.println("Created game \"" + name + "\".");
-        // We do NOT show gameID to the user, per spec
     }
 
     private void doListGames() throws Exception {
@@ -182,11 +181,8 @@ public class ClientApp {
         facade.joinGame(game.gameID(), color);
         System.out.println("Joined \"" + game.gameName() + "\" as " + color + ".");
 
-        // Board drawing will be hooked in Step 5:
-        // BoardPrinter.drawInitial(color.equals("BLACK"));
-        System.out.println(SET_TEXT_FAINT +
-                "(Board drawing will appear once we add it in the next step.)" +
-                RESET_TEXT_BOLD_FAINT);
+        // Draw initial board: black perspective
+        BoardPrinter.drawInitial(color.equals("BLACK"));
     }
 
     private void doObserveGame() throws Exception {
@@ -201,14 +197,10 @@ public class ClientApp {
         facade.joinGame(game.gameID(), null); // null color = observer
         System.out.println("Observing \"" + game.gameName() + "\".");
 
-        // Board drawing will be white perspective for observers
-        // BoardPrinter.drawInitial(false);
-        System.out.println(SET_TEXT_FAINT +
-                "(Board drawing will appear once we add it in the next step.)" +
-                RESET_TEXT_BOLD_FAINT);
+        BoardPrinter.drawInitial(false);
     }
 
-    // ================= Helpers =================
+    //helper
 
     private int askGameIndex(String prompt) {
         while (true) {

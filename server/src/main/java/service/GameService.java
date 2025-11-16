@@ -41,7 +41,7 @@ public class GameService {
 
     public EmptyResult join(String token, server.Server.JoinGameRequest r) throws DataAccessException {
         String username = requireAuth(token);
-        
+
         if (r == null || r.gameID() == null) {
             throw new IllegalArgumentException("bad request");
         }
