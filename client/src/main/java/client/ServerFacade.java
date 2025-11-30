@@ -48,6 +48,7 @@ public class ServerFacade {
         var res = http.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         ensure2xx(res, "Registration failed. Try another username.");
         var auth = gson.fromJson(res.body(), AuthData.class);
+        // auto-login: store token
         authToken = auth.authToken();
         return auth;
     }
@@ -59,6 +60,7 @@ public class ServerFacade {
         var res = http.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         ensure2xx(res, "Login failed. Check username/password.");
         var auth = gson.fromJson(res.body(), AuthData.class);
+        // store token
         authToken = auth.authToken();
         return auth;
     }
@@ -92,7 +94,12 @@ public class ServerFacade {
         var req = base("/game").PUT(HttpRequest.BodyPublishers.ofString(body))
                 .header("Content-Type", "application/json").build();
         var res = http.send(req, HttpResponse.BodyHandlers.discarding());
-        ensure2xx(res, color == null ? "Could not observe game." : "Could not join game.");
+
+        // If our client passes "OBSERVER", give an observer-specific friendly message
+        String friendly = ("OBSERVER".equalsIgnoreCase(color))
+                ? "Could not observe game."
+                : "Could not join game.";
+        ensure2xx(res, friendly);
     }
 
     // some tests
