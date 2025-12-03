@@ -7,6 +7,7 @@ import dataaccess.MySqlDataAccess;
 //import dataaccess.MemoryDataAccess;
 import dataaccess.DbInitializer;
 import io.javalin.Javalin;
+import server.websocket.WebSocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -16,24 +17,22 @@ public class Server {
     private final Javalin javalin;
     private final Gson gson = new Gson();
 
-    // For now keep in-memory; later swap to your MySQL DAO implementation.
+    // DAOs / services
     private final DataAccess dao = new MySqlDataAccess();
     private final ClearService clearSvc = new ClearService(dao);
     private final UserService userSvc = new UserService(dao);
     private final GameService gameSvc = new GameService(dao);
 
     public Server() {
-        //New for server initializning
+        // Database initialization
         try {
             DbInitializer.init();
         } catch (Exception e) {
             throw new RuntimeException("Database initialization failed", e);
         }
-        // -------------------------------------------------------
 
         javalin = Javalin.create(cfg -> cfg.staticFiles.add("web"));
 
-        // exception → http mapping
         javalin.exception(IllegalArgumentException.class, (e, ctx) ->
                 ctx.status(400)
                         .result(gson.toJson(new ErrorMsg("Error: bad request")))
@@ -62,7 +61,7 @@ public class Server {
                         .result(gson.toJson(new ErrorMsg("Error: " + e.getMessage())))
                         .contentType("application/json"));
 
-        // routes
+        // https routes
         javalin.delete("/db", ctx -> {
             clearSvc.clear();
             ctx.status(200)
@@ -106,6 +105,15 @@ public class Server {
             var req = gson.fromJson(ctx.body(), JoinGameRequest.class);
             var res = gameSvc.join(token, req);
             ctx.status(200).result(gson.toJson(res)).contentType("application/json");
+        });
+
+        //websocket additions
+        var wsHandler = new WebSocketHandler(dao, userSvc, gameSvc);
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(wsHandler::onConnect);
+            ws.onClose(wsHandler::onClose);
+            ws.onMessage(wsHandler::onMessage);
         });
     }
 
