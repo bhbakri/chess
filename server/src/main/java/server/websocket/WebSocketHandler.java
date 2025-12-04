@@ -3,14 +3,21 @@ package server.websocket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsMessageContext;
+import model.AuthData;
+import model.GameData;
 import service.GameService;
 import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.messages.ServerMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ErrorMessage;
+import websocket.messages.NotificationMessage;
 
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +96,51 @@ public class WebSocketHandler {
     }
 
     private void handleConnect(WsMessageContext ctx, UserGameCommand baseCommand) {
-        // TODO
+        String authToken = baseCommand.getAuthToken();
+        Integer gameID = baseCommand.getGameID();
+
+        if (authToken == null || gameID == null) {
+            send(ctx, new ErrorMessage("Error: missing authToken or gameID"));
+            return;
+        }
+
+        try {
+            AuthData auth = dao.getAuth(authToken);
+            if (auth == null) {
+                send(ctx, new ErrorMessage("Error: invalid auth token"));
+                return;
+            }
+
+            GameData gameData = dao.getGame(gameID);
+            if (gameData == null) {
+                send(ctx, new ErrorMessage("Error: invalid game id"));
+                return;
+            }
+
+            String username = auth.username();
+            String sessionId = ctx.sessionId();
+
+            sessionToUser.put(sessionId, username);
+            sessionToGame.put(sessionId, gameID);
+            gameToSessions.computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet()).add(ctx);
+
+            send(ctx, new LoadGameMessage(gameData.game()));
+
+            String role;
+            if (username.equals(gameData.whiteUsername())) {
+                role = "as WHITE";
+            } else if (username.equals(gameData.blackUsername())) {
+                role = "as BLACK";
+            } else {
+                role = "as an observer";
+            }
+
+            NotificationMessage note = new NotificationMessage(username + " connected " + role);
+            broadcastToGameExcept(gameID, ctx, note);
+
+        } catch (DataAccessException ex) {
+            send(ctx, new ErrorMessage("Error: " + ex.getMessage()));
+        }
     }
 
     private void handleMakeMove(WsMessageContext ctx, UserGameCommand baseCommand, String rawJson) {
