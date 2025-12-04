@@ -13,11 +13,10 @@ import model.GameData;
 import service.GameService;
 import service.UserService;
 import websocket.commands.UserGameCommand;
-import websocket.commands.MakeMoveCommand;
-import websocket.messages.ServerMessage;
-import websocket.messages.LoadGameMessage;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +121,9 @@ public class WebSocketHandler {
 
             sessionToUser.put(sessionId, username);
             sessionToGame.put(sessionId, gameID);
-            gameToSessions.computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet()).add(ctx);
+            gameToSessions
+                    .computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet())
+                    .add(ctx);
 
             send(ctx, new LoadGameMessage(gameData.game()));
 
@@ -138,8 +139,8 @@ public class WebSocketHandler {
             NotificationMessage note = new NotificationMessage(username + " connected " + role);
             broadcastToGameExcept(gameID, ctx, note);
 
-        } catch (DataAccessException ex) {
-            send(ctx, new ErrorMessage("Error: " + ex.getMessage()));
+        } catch (DataAccessException e) {
+            send(ctx, new ErrorMessage("Error: " + e.getMessage()));
         }
     }
 
