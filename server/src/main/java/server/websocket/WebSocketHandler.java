@@ -51,11 +51,15 @@ public class WebSocketHandler {
         String sessionId = ctx.sessionId();
         Integer gameID = sessionToGame.remove(sessionId);
         sessionToUser.remove(sessionId);
+
         if (gameID != null) {
             Set<WsContext> sessions = gameToSessions.get(gameID);
             if (sessions != null) {
                 sessions.remove(ctx);
-                if (sessions.isEmpty()) gameToSessions.remove(gameID);
+                if (sessions.isEmpty()) {
+                    gameToSessions.remove(gameID);
+                    finishedGames.remove(gameID);
+                }
             }
         }
     }
