@@ -81,18 +81,26 @@ public class WebSocketHandler {
 
     private void broadcastToGame(int gameID, ServerMessage msg) {
         Set<WsContext> sessions = gameToSessions.get(gameID);
-        if (sessions == null) return;
+        if (sessions == null) {
+            return;
+        }
         String json = gson.toJson(msg);
-        for (WsContext c : sessions) c.send(json);
+        for (WsContext c : sessions) {
+            c.send(json);
+        }
     }
 
     private void broadcastToGameExcept(int gameID, WsContext except, ServerMessage msg) {
         Set<WsContext> sessions = gameToSessions.get(gameID);
-        if (sessions == null) return;
+        if (sessions == null) {
+            return;
+        }
         String json = gson.toJson(msg);
-        for (WsContext c : sessions)
-            if (!c.sessionId().equals(except.sessionId()))
+        for (WsContext c : sessions) {
+            if (!c.sessionId().equals(except.sessionId())) {
                 c.send(json);
+            }
+        }
     }
 
     private void handleConnect(WsMessageContext ctx, UserGameCommand cmd) {
@@ -218,10 +226,14 @@ public class WebSocketHandler {
         Integer gameID = cmd.getGameID();
         try {
             AuthData auth = dao.getAuth(token);
-            if (auth == null) return;
+            if (auth == null) {
+                return;
+            }
 
             GameData game = dao.getGame(gameID);
-            if (game == null) return;
+            if (game == null) {
+                return;
+            }
 
             String user = auth.username();
             String sid = ctx.sessionId();
@@ -229,8 +241,12 @@ public class WebSocketHandler {
             String white = game.whiteUsername();
             String black = game.blackUsername();
 
-            if (user.equals(white)) white = null;
-            if (user.equals(black)) black = null;
+            if (user.equals(white)) {
+                white = null;
+            }
+            if (user.equals(black)) {
+                black = null;
+            }
 
             dao.updateGame(new GameData(game.gameID(), white, black, game.gameName(), game.game()));
 
@@ -254,7 +270,9 @@ public class WebSocketHandler {
                 return;
             }
             GameData game = dao.getGame(gameID);
-            if (game == null) return;
+            if (game == null) {
+                return;
+            }
 
             String user = auth.username();
 
